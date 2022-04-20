@@ -1,0 +1,31 @@
+{
+  "name": "near-template-rs",
+  "version": "0.1.0",
+  "license": "LGPL-3.0",
+  "scripts": {
+    "pretest": "npm run build:all && npm run lint",
+    "build:testnet": "npm run build -- --features testnet",
+    "build": "cargo build --target wasm32-unknown-unknown --release ",
+    "build:all": "npm run build -- --all --exclude contract-utils",
+    "test": "ava",
+    "test:testnet": "NEAR_WORKSPACES_NETWORK=testnet npm run test",
+    "deploy:testnet": "npm run build:testnet && near repl -s ./scripts/deploy.ts",
+    "deploy": "npm run build && near repl -s ./scripts/deploy.ts",
+    "test:unit": "cargo test",
+    "test:ci": "npm run test:unit && npm run test",
+    "lint": "eslint . --ext .ts"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.19.0",
+    "@typescript-eslint/parser": "^5.19.0",
+    "eslint": "^8.13.0",
+    "near-cli": "git+https://github.com/ahalabs/near-cli#betav1",
+    "near-workspaces-ava": "^1.1.0",
+    "ts-node": "^10.4.0",
+    "typedoc": "^0.22.15",
+    "typescript": "^4.5.5"
+  },
+  "dependencies": {
+    "near-api-js": "git+https://github.com/ahalabs/near-api-js#betav1"
+  }
+}

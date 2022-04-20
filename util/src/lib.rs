@@ -1,0 +1,34 @@
+pub use near_sdk;
+pub use near_units;
+pub mod account;
+pub mod owner;
+pub mod reg;
+pub mod component;
+
+use near_sdk::{env, require};
+
+/// Mesaure cost
+pub fn measure_storage_cost<F: FnOnce()>(f: F) -> u128 {
+    let bytes_used_before = env::storage_usage();
+    f();
+    let bytes_used = env::storage_usage() - bytes_used_before;
+    env::storage_byte_cost() * bytes_used as u128
+}
+
+pub fn left_over_balance<F: FnOnce()>(f: F) -> u128 {
+    let cost = measure_storage_cost(f);
+    let attached_deposit = near_sdk::env::attached_deposit();
+    require!(
+        attached_deposit >= cost,
+        "Not enough attached deposit to cover storage"
+    );
+    attached_deposit - cost
+}
+
+pub fn refund_storage_cost<F: FnOnce()>(f: F, register_id: u64) {
+    let amount_to_refund = left_over_balance(f);
+    if 0 < amount_to_refund {
+        let promise_index = account::create_promise_for_predecessor(register_id);
+        env::promise_batch_action_transfer(promise_index, amount_to_refund)
+    }
+}

@@ -1,0 +1,38 @@
+# This workflow builds the docs and deploys them to GitHub Pages on every commit to the master branch
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Build & Deploy GUI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+          toolchain: stable
+    - uses: actions-rs/cargo@v1
+      with:
+        command: install
+        args: witme --git https://github.com/AhaLabs/witme --branch feat/update_witgen
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '16.x'
+        cache: 'yarn'
+    - name: Install and Build
+      run: |
+        npm ci
+        npm run gui:build
+    - name: Deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@3.7.1
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH: gh-pages # The branch the action should deploy to.
+        FOLDER: gui/build # The folder the action should deploy.

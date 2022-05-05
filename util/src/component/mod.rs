@@ -4,7 +4,8 @@ use near_sdk::{
     IntoStorageKey,
 };
 
-// pub mod lazy;
+pub mod lazy;
+pub use lazy::*;
 
 pub struct Component<T: BorshDeserialize + BorshSerialize> {
     state: LazyOption<T>,

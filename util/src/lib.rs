@@ -1,9 +1,10 @@
 pub use near_sdk;
 pub use near_units;
 pub mod account;
+pub mod component;
 pub mod owner;
 pub mod reg;
-pub mod component;
+pub mod upgrade;
 
 use near_sdk::{env, require};
 
@@ -32,3 +33,14 @@ pub fn refund_storage_cost<F: FnOnce()>(f: F, register_id: u64) {
         env::promise_batch_action_transfer(promise_index, amount_to_refund)
     }
 }
+
+pub trait IntoKey {
+    fn into_storage_key(&self) -> Vec<u8>;
+}
+
+// pub fn decode_json_from_input<T: near_sdk::serde::Deserialize<'a>>() -> T {
+//     near_sdk::serde_json::from_slice(
+//         &near_sdk::env::input().expect("Expected input since method has arguments."),
+//     )
+//     .expect("Failed to deserialize input from JSON.")
+// }

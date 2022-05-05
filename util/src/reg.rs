@@ -1,7 +1,11 @@
 use near_sdk::sys;
 
-pub fn input(registry_id: u64) {
-    unsafe { sys::input(registry_id) }
+pub const EVICTED_REGISTER: u64 = std::u64::MAX - 1;
+pub const DATA_REGISTER: u64 = std::u64::MAX - 2;
+
+pub fn input(reg_id: u64) -> u64 {
+    unsafe { sys::input(reg_id) };
+    reg_id
 }
 
 pub fn sha256_hash(input_reg: u64, output_reg: u64) {
@@ -20,6 +24,18 @@ pub fn storage_write(key_register: u64, value_register: u64, eviction_register: 
             u64::MAX,
             value_register,
             eviction_register,
+        )
+    }
+}
+
+pub fn storage_write_from_reg(key_value: &[u8], value_register: u64) -> u64 {
+    unsafe {
+        sys::storage_write(
+            key_value.len() as _,
+            key_value.as_ptr() as _,
+            u64::MAX,
+            value_register,
+            EVICTED_REGISTER,
         )
     }
 }

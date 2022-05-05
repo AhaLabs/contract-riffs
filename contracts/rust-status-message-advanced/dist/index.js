@@ -48,46 +48,48 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Contract = void 0;
-var helper_1 = require("./helper");
+var helper_1 = require("./helper"); /**
+* StorageUsage is used to count the amount of storage used by a contract.
+*/
 var Contract = /** @class */ (function () {
     function Contract(account, contractId) {
         this.account = account;
         this.contractId = contractId;
     }
     /**
-    * Stores the bytes at its corresponding sha256 hash
+    * Retreive a message for a given account id
     */
-    Contract.prototype.upload = function (args, options) {
+    Contract.prototype.get_status = function (args, options) {
+        return this.account.viewFunction(this.contractId, "get_status", args, options);
+    };
+    /**
+    * Store a message for current signer account
+    */
+    Contract.prototype.set_status = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
                         _b = (_a = helper_1.providers).getTransactionLastResult;
-                        return [4 /*yield*/, this.uploadRaw(args, options)];
+                        return [4 /*yield*/, this.set_statusRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
             });
         });
     };
     /**
-    * Stores the bytes at its corresponding sha256 hash
+    * Store a message for current signer account
     */
-    Contract.prototype.uploadRaw = function (args, options) {
-        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "upload", args: args }, options));
+    Contract.prototype.set_statusRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "set_status", args: args }, options));
     };
     /**
-    * Stores the bytes at its corresponding sha256 hash
+    * Store a message for current signer account
     */
-    Contract.prototype.uploadTx = function (args, options) {
+    Contract.prototype.set_statusTx = function (args, options) {
         var _a, _b;
-        return helper_1.transactions.functionCall("upload", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
-    };
-    /**
-    * Fetch binary corresponding the sha256
-    */
-    Contract.prototype.fetch = function (args, options) {
-        return this.account.viewFunction(this.contractId, "fetch", args, options);
+        return helper_1.transactions.functionCall("set_status", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     return Contract;
 }());

@@ -1,13 +1,20 @@
 // This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (cargo-witgen v0.12.0) 
 
 
-///  Stores the bytes at its corresponding sha256 hash
-///  change
-upload-binary-bytes: function(bytes: list<u8>) -> list<u8>
 
-///  Fetch binary corresponding the sha256
-fetch-binary: function(sha-bytes: list<u8>) -> list<u8>
-// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.0) 
+///  A message that contains some text
+record message {
+    ///  Inner string value
+///  @pattern ^TEXT:
+    text: string
+}
+
+///  A view call to get the current message
+get-message: function() -> message
+
+///  A change call to set the message
+///  change
+set-message: function(message: message)// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.0) 
 
 ///  StorageUsage is used to count the amount of storage used by a contract.
 type storage-usage = u64

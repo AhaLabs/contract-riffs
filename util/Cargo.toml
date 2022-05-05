@@ -11,3 +11,4 @@ crate-type = ["cdylib", "rlib"]
 # near-sdk = { path = "../../../near-sdk-rs/near-sdk"}
 near-sdk = { git = "https://github.com/ahalabs/near-sdk-rs", tag = "v4.0.0-3", features = ["unstable"]}
 near-units = "0.2.0"
+witgen = "0.12.0"

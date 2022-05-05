@@ -1,110 +1,76 @@
+//! A persistent lazy option. Stores a value for a given key.
+//! Example:
+//! If the underlying value is large, e.g. the contract needs to store an image, but it doesn't need
+//! to have access to this image at regular calls, then the contract can wrap this image into
+//! `LazyOption` and it will not be deserialized until requested.
+use std::marker::PhantomData;
 
-use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
+use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 
+use near_sdk::env;
+use near_sdk::IntoStorageKey;
 
-use crate::env;
-use crate::near_sdk::IntoStorageKey;
-
+use crate::reg::storage_write_from_reg;
 
 const ERR_VALUE_SERIALIZATION: &str = "Cannot serialize value with Borsh";
 const ERR_VALUE_DESERIALIZATION: &str = "Cannot deserialize value with Borsh";
-const ERR_NOT_FOUND: &str = "No value found for the given key";
-const ERR_DELETED: &str = "The Lazy cell's value has been deleted. Verify the key has not been\
-                            deleted manually.";
 
-fn expect_key_exists<T>(val: Option<T>) -> T {
-    val.unwrap_or_else(|| env::panic_str(ERR_NOT_FOUND))
-}
-
-fn expect_consistent_state<T>(val: Option<T>) -> T {
-    val.unwrap_or_else(|| env::panic_str(ERR_DELETED))
-}
-
-pub(crate) fn load_and_deserialize<T>(key: &[u8]) -> Option<T>
-where
-    T: BorshDeserialize,
-{
-    let bytes = expect_key_exists(env::storage_read(key));
-    let val =
-        T::try_from_slice(&bytes).unwrap_or_else(|_| env::panic_str(ERR_VALUE_DESERIALIZATION));
-    Some(val)
-}
-
-pub(crate) fn serialize_and_store<T>(key: &[u8], value: &T)
-where
-    T: BorshSerialize,
-{
-    let serialized = value.try_to_vec().unwrap_or_else(|_| env::panic_str(ERR_VALUE_SERIALIZATION));
-    env::storage_write(key, &serialized);
-}
-
-/// An persistent lazily loaded option, that stores a `value` in the storage when `Some(value)`
-/// is set, and not when `None` is set. `LazyOption` also [`Deref`]s into [`Option`] so we get
-/// all its APIs for free.
-///
-/// This will only write to the underlying store if the value has changed, and will only read the
-/// existing value from storage once.
-///
-/// # Examples
-/// ```
-/// use near_sdk::store::LazyOption;
-///
-/// let mut a = LazyOption::new(b"a", None);
-/// assert!(a.is_none());
-///
-/// *a = Some("new value".to_owned());
-/// assert_eq!(a.get(), &Some("new value".to_owned()));
-///
-/// // Using Option::replace:
-/// let old_str = a.replace("new new value".to_owned());
-/// assert_eq!(old_str, Some("new value".to_owned()));
-/// assert_eq!(a.get(), &Some("new new value".to_owned()));
-/// ```
-/// [`Deref`]: std::ops::Deref
+/// An persistent lazy option, that stores a value in the storage.
 #[derive(BorshSerialize, BorshDeserialize)]
-pub struct LazyOption<T>
-where
-    T: BorshSerialize,
-{
-    /// Key bytes to index the contract's storage.
-    storage_key: Box<[u8]>,
-
+pub struct LazyOption<T> {
+    storage_key: Vec<u8>,
+    #[borsh_skip]
+    el: PhantomData<T>,
 }
 
-trait HasKey {
-  fn get() -> Box<[u8]>;
-}
-
-impl<T> LazyOption<T>
-where
-    T: BorshSerialize,
-{
-    
-
-    /// Updates the value with a new value. This does not load the current value from storage.
-    pub fn set<K: HashKey>(key: K, value: T) {
-
+impl<T> LazyOption<T> {
+    /// Returns `true` if the value is present in the storage.
+    pub fn is_some(&self) -> bool {
+        env::storage_has_key(&self.storage_key)
     }
 
-    /// Writes any changes to the value to storage. This will automatically be done when the
-    /// value is dropped through [`Drop`] so this should only be used when the changes need to be
-    /// reflected in the underlying storage before then.
-    pub fn flush(&mut self) {
-        if let Some(v) = self.cache.get_mut() {
-            if !v.is_modified() {
-                return;
-            }
+    /// Returns `true` if the value is not present in the storage.
+    pub fn is_none(&self) -> bool {
+        !self.is_some()
+    }
 
-            match v.value().as_ref() {
-                Some(value) => serialize_and_store(&self.storage_key, value),
-                None => {
-                    env::storage_remove(&self.storage_key);
-                }
-            }
+    /// Reads the raw value from the storage
+    fn get_raw(&self) -> Option<Vec<u8>> {
+        env::storage_read(&self.storage_key)
+    }
 
-            // Replaces cache entry state to cached because the value in memory matches the
-            // stored value. This avoids writing the same value twice.
-            v.replace_state(EntryState::Cached);
+    /// Removes the value from the storage.
+    /// Returns true if the element was present.
+    fn remove_raw(&mut self) -> bool {
+        env::storage_remove(&self.storage_key)
+    }
+
+    /// Removes the raw value from the storage and returns it as an option.
+    pub fn take_raw(&mut self) -> Option<Vec<u8>> {
+        if self.remove_raw() {
+            Some(env::storage_get_evicted().unwrap())
+        } else {
+            None
+        }
+    }
+
+    pub fn set_raw(&mut self, raw_value: &[u8]) -> bool {
+        env::storage_write(&self.storage_key, raw_value)
+    }
+
+    pub fn set_reg(&mut self, register_id: u64) -> bool {
+        match storage_write_from_reg(&self.storage_key, register_id) {
+            0 => false,
+            1 => true,
+            _ => env::abort(),
+        }
+    }
+
+    pub fn replace_raw(&mut self, raw_value: &[u8]) -> Option<Vec<u8>> {
+        if self.set_raw(raw_value) {
+            Some(env::storage_get_evicted().unwrap())
+        } else {
+            None
         }
     }
 }
@@ -113,20 +79,169 @@ impl<T> LazyOption<T>
 where
     T: BorshSerialize + BorshDeserialize,
 {
-    /// Returns a reference to the lazily loaded optional.
-    /// The load from storage only happens once, and if the value is already cached, it will not
-    /// be reloaded.
-    pub fn get(&self) -> &Option<T> {
-        let entry = self.cache.get_or_init(|| load_and_deserialize(&self.storage_key));
-        entry.value()
+    /// Create a new lazy option with the given `storage_key` and the initial value.
+    pub fn new<S>(storage_key: S, value: Option<&T>) -> Self
+    where
+        S: IntoStorageKey,
+    {
+        let mut this = Self {
+            storage_key: storage_key.into_storage_key(),
+            el: PhantomData,
+        };
+        if let Some(value) = value {
+            this.set(value);
+        }
+        this
     }
 
-    /// Returns a reference to the lazily loaded optional.
-    /// The load from storage only happens once, and if the value is already cached, it will not
-    /// be reloaded.
-    pub fn get_mut(&mut self) -> &mut Option<T> {
-        self.cache.get_or_init(|| load_and_deserialize(&self.storage_key));
-        let entry = self.cache.get_mut().unwrap_or_else(|| env::abort());
-        entry.value_mut()
+    fn serialize_value(value: &T) -> Vec<u8> {
+        match value.try_to_vec() {
+            Ok(x) => x,
+            Err(_) => env::panic_str(ERR_VALUE_SERIALIZATION),
+        }
+    }
+
+    fn deserialize_value(raw_value: &[u8]) -> T {
+        match T::try_from_slice(raw_value) {
+            Ok(x) => x,
+            Err(_) => env::panic_str(ERR_VALUE_DESERIALIZATION),
+        }
+    }
+
+    /// Removes the value from storage without reading it.
+    /// Returns whether the value was present.
+    pub fn remove(&mut self) -> bool {
+        self.remove_raw()
+    }
+
+    /// Removes the value from storage and returns it as an option.
+    pub fn take(&mut self) -> Option<T> {
+        self.take_raw().map(|v| Self::deserialize_value(&v))
+    }
+
+    /// Gets the value from storage and returns it as an option.
+    pub fn get(&self) -> Option<T> {
+        self.get_raw().map(|v| Self::deserialize_value(&v))
+    }
+
+    /// Sets the value into the storage without reading the previous value and returns whether the
+    /// previous value was present.
+    pub fn set(&mut self, value: &T) -> bool {
+        self.set_raw(&Self::serialize_value(value))
+    }
+
+    /// Replaces the value in the storage and returns the previous value as an option.
+    pub fn replace(&mut self, value: &T) -> Option<T> {
+        self.replace_raw(&Self::serialize_value(value))
+            .map(|v| Self::deserialize_value(&v))
+    }
+
+    pub fn mut_map<F: FnOnce(T) -> T>(&mut self, f: F) -> Option<T> {
+        self.replace(&f(self.get()?))
+    }
+
+    pub fn mut_map_or_else<D, F>(&mut self, default: D, f: F) -> Option<T>
+    where
+        D: FnOnce() -> T,
+        F: FnOnce(T) -> T,
+    {
+      self.replace(&self.get().map_or_else(default, f))
+    }
+
+    pub fn map<F, U>(&self, f: F) -> Option<U>
+    where
+        F: FnOnce(T) -> Option<U>,
+    {
+        f(self.get()?)
+    }
+}
+
+impl<T> std::fmt::Debug for LazyOption<T>
+where
+    T: std::fmt::Debug + BorshSerialize + BorshDeserialize,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if cfg!(feature = "expensive-debug") {
+            self.get().fmt(f)
+        } else {
+            f.debug_struct("LazyOption")
+                .field("storage_key", &self.storage_key)
+                .finish()
+        }
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    pub fn test_all() {
+        let mut a = LazyOption::new(b"a", None);
+        assert!(a.is_none());
+        a.set(&42u32);
+        assert!(a.is_some());
+        assert_eq!(a.get(), Some(42));
+        assert!(a.is_some());
+        assert_eq!(a.replace(&95), Some(42));
+        assert!(a.is_some());
+        assert_eq!(a.take(), Some(95));
+        assert!(a.is_none());
+        assert_eq!(a.replace(&105), None);
+        assert!(a.is_some());
+        assert_eq!(a.get(), Some(105));
+        assert!(a.remove());
+        assert!(a.is_none());
+        assert_eq!(a.get(), None);
+        assert_eq!(a.take(), None);
+        assert!(a.is_none());
+    }
+
+    #[test]
+    pub fn test_multi() {
+        let mut a = LazyOption::new(b"a", None);
+        let mut b = LazyOption::new(b"b", None);
+        assert!(a.is_none());
+        assert!(b.is_none());
+        a.set(&42u32);
+        assert!(b.is_none());
+        assert!(a.is_some());
+        assert_eq!(a.get(), Some(42));
+        b.set(&32u32);
+        assert!(a.is_some());
+        assert!(b.is_some());
+        assert_eq!(a.get(), Some(42));
+        assert_eq!(b.get(), Some(32));
+    }
+
+    #[test]
+    pub fn test_init_value() {
+        let a = LazyOption::new(b"a", Some(&42u32));
+        assert!(a.is_some());
+        assert_eq!(a.get(), Some(42));
+    }
+
+    #[test]
+    pub fn test_debug() {
+        let mut lazy_option = LazyOption::new(b"m", None);
+        if cfg!(feature = "expensive-debug") {
+            assert_eq!(format!("{:?}", lazy_option), "None");
+        } else {
+            assert_eq!(
+                format!("{:?}", lazy_option),
+                "LazyOption { storage_key: [109] }"
+            );
+        }
+
+        lazy_option.set(&1u64);
+        if cfg!(feature = "expensive-debug") {
+            assert_eq!(format!("{:?}", lazy_option), "Some(1)");
+        } else {
+            assert_eq!(
+                format!("{:?}", lazy_option),
+                "LazyOption { storage_key: [109] }"
+            );
+        }
     }
 }

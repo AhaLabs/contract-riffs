@@ -16,6 +16,22 @@ import { BalanceDelta, getDelta } from "./delta";
 
 export * from "./bin";
 
+export function getRegistry(root: NearAccount): Promise<NearAccount> {
+    return root.createAndDeploy("registry", binPath("contract_registry"));
+}
+
+export async function getBootloader(root: NearAccount, initialized = true): Promise<NearAccount> {
+    let bootloader = await root.createAndDeploy("bootloader", binPath("bootloader"));
+    if (initialized) {
+        let res = await root.call_raw(bootloader, "set_owner", Buffer.from(root.accountId, "utf8"));
+        console.error(res.succeeded);
+        if (res.failed) {
+            throw new Error("failed to deploy bootloader")
+        }
+    }
+    return bootloader;
+}
+
 // This will allow the contract account to be deleted since the size is reduced
 export async function deployEmpty(account: NearAccount): Promise<void> {
     if (!Workspace.networkIsTestnet()) {

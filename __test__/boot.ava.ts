@@ -1,7 +1,7 @@
 import { Workspace } from "near-workspaces-ava";
 import { NEAR } from "near-units";
 import {
-    binPath, cost_of_bytes, registry,
+    binPath, cost_of_bytes, getRegistry,
 } from "./util";
 import * as fs from "fs/promises";
 
@@ -12,7 +12,11 @@ const bin = binPath("contract_registry");
 
 const runner = Workspace.init(
     { initialBalance: NEAR.parse("15 N").toString() },
-    async ({ root }) => ({ registry: await registry(root) })
+    async ({ root }) => {
+        let registry = await getRegistry(root);
+        
+        return { registry };
+    }
 );
 
 runner.test("cover storage costs", async (t, { root, registry }) => {

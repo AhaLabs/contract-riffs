@@ -3,6 +3,7 @@ members = [
   "contracts/*"
   # "util"
 ]
+exclude = ["util"]
 
 [profile.release]
 codegen-units = 1

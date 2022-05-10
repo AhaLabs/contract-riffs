@@ -19,9 +19,5 @@ jobs:
       - uses: Swatinem/rust-cache@v1
       - name: Add wasm32 target
         run: rustup target add wasm32-unknown-unknown
-      - name: install node
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Run tests
-        run: npm ci && npm run test:ci
+      - name: tests
+        run: cargo test

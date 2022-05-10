@@ -4,6 +4,7 @@
 //!
 
 use contract_utils::{
+    lazy::*,
     near_sdk::{
         self,
         borsh::{self, BorshDeserialize, BorshSerialize},
@@ -12,10 +13,10 @@ use contract_utils::{
     IntoKey,
 };
 
+/// Uses ownable to check owner before deploying contract
+pub use contract_utils::deploy::*;
 /// Is ownable, e.i. stores owner in storage at "OWNER"
 pub use contract_utils::owner::*;
-/// Uses ownable to check owner before deploying contract
-pub use contract_utils::upgrade::*;
 
 const MESSAGE_KEY: &str = "MESSAGE";
 
@@ -26,14 +27,8 @@ pub struct Message {
 }
 
 impl IntoKey for Message {
-    fn into_storage_key(&self) -> Vec<u8> {
+    fn into_storage_key() -> Vec<u8> {
         MESSAGE_KEY.as_bytes().to_vec()
-    }
-}
-
-impl Message {
-    fn update(&mut self, msg: Message) -> Option<String> {
-        self.set_lazy(msg).as_ref().map(|m| m.text.clone())
     }
 }
 
@@ -43,7 +38,7 @@ pub fn update_message() {
         &near_sdk::env::input().expect("Expected input since method has arguments."),
     )
     .expect("Failed to deserialize input from JSON.");
-    let result = Message::default().update(msg);
+    let result = Message::set_lazy(msg);
     let result = near_sdk::serde_json::to_vec(&result)
         .expect("Failed to serialize the return value using JSON.");
     near_sdk::env::value_return(&result)
@@ -51,7 +46,7 @@ pub fn update_message() {
 
 #[no_mangle]
 pub fn get_message() {
-    let result = Message::default().get_lazy().get();
+    let result = Message::get_lazy().get();
     let result = near_sdk::serde_json::to_vec(&result)
         .expect("Failed to serialize the return value using JSON.");
     near_sdk::env::value_return(&result)

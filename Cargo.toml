@@ -1,9 +1,15 @@
+[package]
+edition = "2021"
+name = "bootme"
+version = "0.1.0"
+publish = false
+
 [workspace]
 members = [
   "contracts/*"
   # "util"
 ]
-exclude = ["util"]
+exclude = ["util", "bootme"]
 
 [profile.release]
 codegen-units = 1
@@ -13,3 +19,12 @@ debug = false
 panic = "abort"
 overflow-checks = true
 
+[dev-dependencies]
+anyhow = "1.0"
+near-primitives = "0.5.0"
+near-units = "0.2.0"
+serde_json = "1.0"
+tokio = { version = "1.14", features = ["full"] }
+workspaces = "0.2.1"
+near-sdk = "4.0.0-pre.8"
+lazy-static-include = "3.1.2"

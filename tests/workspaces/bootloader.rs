@@ -50,7 +50,8 @@ async fn non_owner_cannot_transfer() -> anyhow::Result<()> {
         .call(worker, &bootloader.id(), "set_owner")
         .args(alice.id().as_bytes().to_vec())
         .transact()
-        .await?;
-    assert!(res.is_failure());
+        .await;
+    println!("{:#?}", res);
+    assert!(res.is_err());
     Ok(())
 }

@@ -335,6 +335,7 @@ dependencies = [
  "lazy-static-include",
  "near-sdk 4.0.0-pre.8",
  "near-units",
+ "proc-macro2",
  "serde_json",
  "tokio",
  "workspaces",

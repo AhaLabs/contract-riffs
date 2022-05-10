@@ -7,7 +7,7 @@ use crate::{
 };
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
-    env, require,
+    env, require, log
 };
 
 pub const OWNER_KEY: &str = "OWNER";

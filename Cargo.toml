@@ -21,7 +21,6 @@ overflow-checks = true
 
 [dev-dependencies]
 anyhow = "1.0"
-near-primitives = "0.5.0"
 near-units = "0.2.0"
 serde_json = "1.0"
 tokio = { version = "1.14", features = ["full"] }

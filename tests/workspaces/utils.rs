@@ -10,7 +10,7 @@ lazy_static_include::lazy_static_include_bytes! {
 pub async fn init(
     worker: &Worker<impl DevNetwork>,
     root: &Account,
-    registry: bool,
+    init_registry: bool,
 ) -> anyhow::Result<(Contract, Option<Contract>)> {
     let bootloader = worker.dev_deploy(&BOOTLOADER).await?;
     let owner_bytes = root.id().as_bytes().to_vec();
@@ -24,11 +24,11 @@ pub async fn init(
 
     assert!(res.is_success(), "set owner");
 
-    let registry = if registry {
+    let registry = if init_registry {
         let registry = worker.dev_deploy(&REGISTRY).await?;
 
         let res = root
-            .call(&worker, registry.id(), "upload")
+            .call(worker, registry.id(), "upload")
             .args(BOOTLOADER.to_vec())
             .gas(300_000_000_000_000)
             .deposit(parse_near!("1N"))
@@ -38,7 +38,7 @@ pub async fn init(
         assert!(res.is_success(), "uploaded bootloader bytes");
 
         let res = root
-            .call(&worker, registry.id(), "upload")
+            .call(worker, registry.id(), "upload")
             .args(REGISTRY.to_vec())
             .gas(300_000_000_000_000)
             .deposit(parse_near!("1N"))

@@ -8,7 +8,6 @@ use contract_utils::near_sdk::{
 
 pub use contract_utils::prelude::*;
 
-
 mod views;
 
 /// A message that contains some text

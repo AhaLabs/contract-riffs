@@ -14,7 +14,6 @@ pub async fn init(
 ) -> anyhow::Result<(Contract, Option<Contract>)> {
     let bootloader = worker.dev_deploy(&BOOTLOADER).await?;
     let owner_bytes = root.id().as_bytes().to_vec();
-    println!("{}", owner_bytes.len());
     let res = root
         .call(worker, bootloader.id(), "set_owner")
         .args(owner_bytes)

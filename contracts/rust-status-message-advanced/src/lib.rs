@@ -6,8 +6,7 @@ use contract_utils::near_sdk::{
     witgen,
 };
 
-use contract_utils::owner::*;
-
+pub use contract_utils::prelude::*;
 
 mod views;
 
@@ -41,7 +40,7 @@ impl Default for Contract {
 impl Contract {
     /// A change call to set the message
     pub fn set_message(&mut self, message: Message) {
-        self.assert_predecessor();
+        self.assert_owner();
         self.message = message;
     }
 }

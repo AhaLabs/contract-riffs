@@ -40,11 +40,18 @@ pub fn storage_write_from_reg(key_value: &[u8], value_register: u64) -> u64 {
     }
 }
 
-pub fn storage_read(key_register: u64, eviction_reg: u64) -> Option<u64> {
+pub fn storage_read_from_reg(key_register: u64, eviction_reg: u64) -> Option<u64> {
     match unsafe { sys::storage_read(u64::MAX, key_register, eviction_reg) } {
         1 => Some(eviction_reg),
         _ => None,
     }
+}
+
+pub fn storage_read(key: &[u8], into_reg: u64) -> Option<u64> {
+  match unsafe { sys::storage_read(key.len() as _ , key.as_ptr() as _, into_reg) } {
+      1 => Some(EVICTED_REGISTER),
+      _ => None,
+  }
 }
 
 pub fn storage_has_key(key_register: u64) -> bool {

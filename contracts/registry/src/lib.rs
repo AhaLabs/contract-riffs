@@ -27,8 +27,10 @@ fn _upload() -> Option<()> {
 
 #[no_mangle]
 pub fn fetch() {
+    // Pub input into register zero as key for storage
     reg::input(0);
-    reg::value_return(reg::storage_read(0, 1).expect("MISSING BINARY"));
+    // Read storage into register 0 and return value in register 0
+    reg::value_return(reg::storage_read_from_reg(0, 1).expect("MISSING BINARY"));
 }
 
 #[allow(dead_code, unused_variables)]

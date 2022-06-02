@@ -7,13 +7,13 @@ use crate::{
 };
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
-    env, require, log
+    env, require,
 };
 
 pub const OWNER_KEY: &str = "OWNER";
 
 #[derive(Debug, BorshSerialize)]
-pub struct Owner(FixedAccountId);
+pub(crate) struct Owner(FixedAccountId);
 
 impl IntoKey for Owner {
     fn into_storage_key() -> Vec<u8> {
@@ -96,7 +96,7 @@ impl Owner {
     pub fn get_str() -> String {
         Owner::is_set()
             .then(|| unsafe {
-                String::from_utf8_unchecked(env::storage_read(&OWNER_KEY.as_bytes()).unwrap())
+                String::from_utf8_unchecked(env::storage_read(OWNER_KEY.as_bytes()).unwrap())
             })
             .unwrap_or_else(|| env::panic_str("Owner not set"))
     }

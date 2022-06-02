@@ -145,7 +145,7 @@ where
         D: FnOnce() -> T,
         F: FnOnce(T) -> T,
     {
-      self.replace(&self.get().map_or_else(default, f))
+        self.replace(&self.get().map_or_else(default, f))
     }
 
     pub fn map<F, U>(&self, f: F) -> Option<U>

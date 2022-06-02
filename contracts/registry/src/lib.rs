@@ -1,51 +1,87 @@
 use contract_utils::{
-    near_sdk::{require, witgen},
+    near_sdk::{
+        self,
+        borsh::{self, BorshDeserialize, BorshSerialize},
+        collections::Vector,
+        near_bindgen,
+    },
+    owner::*,
+    publish::Version,
     refund_storage_cost, reg,
 };
 
-#[no_mangle]
-pub fn upload() {
-    _upload().unwrap()
+#[near_bindgen]
+#[derive(BorshDeserialize, BorshSerialize)]
+pub struct Contract {
+    current_version: Version,
+    versions: Vector<Version>,
 }
 
-fn _upload() -> Option<()> {
-    let input_id = 0;
-    reg::input(input_id);
-    let sha_id = 1;
-    reg::sha256_hash(input_id, sha_id);
-    require!(!reg::storage_has_key(sha_id), "ERR_ALREADY_EXISTS");
-    let eviction_id = sha_id + 1;
-    refund_storage_cost(
-        || {
-            reg::storage_write(input_id, sha_id, eviction_id);
-        },
-        eviction_id + 1,
-    );
-    reg::value_return(sha_id);
-    Some(())
+impl Default for Contract {
+    fn default() -> Self {
+        Self {
+            current_version: Default::default(),
+            versions: Vector::new(b"v"),
+        }
+    }
 }
 
-#[no_mangle]
-pub fn fetch() {
-    // Pub input into register zero as key for storage
-    reg::input(0);
-    // Read storage into register 0 and return value in register 0
-    reg::value_return(reg::storage_read_from_reg(0, 1).expect("MISSING BINARY"));
-}
-
-#[allow(dead_code, unused_variables)]
-mod private {
-    use super::witgen;
-    /// Stores the bytes at its corresponding sha256 hash
-    /// change
-    #[witgen]
-    pub fn upload() -> Vec<u8> {
-        vec![]
+#[near_bindgen]
+impl Contract {
+    /// Non-breaking fix
+    #[payable]
+    pub fn patch(&mut self) {
+        self.assert_owner();
+        self.current_version.publish_patch();
+        refund_storage_cost(
+            || {
+                self.current_version.input_to_storage();
+            },
+            10,
+        );
     }
 
-    /// Fetch binary corresponding the sha256
-    #[witgen]
-    pub fn fetch() -> Vec<u8> {
-        vec![]
+    /// Non-breaking feature
+    #[payable]
+    pub fn minor(&mut self) {
+        self.assert_owner();
+        self.current_version.publish_minor();
+        refund_storage_cost(
+            || {
+                self.current_version.input_to_storage();
+            },
+            10,
+        );
+    }
+
+    /// Breaking change
+    #[payable]
+    pub fn major(&mut self) {
+        self.assert_owner();
+        self.current_version.publish_major();
+        refund_storage_cost(
+            || {
+                self.current_version.input_to_storage();
+            },
+            10,
+        );
+    }
+
+    pub fn fetch(&self) {
+        let input_reg = 0;
+        reg::input(input_reg);
+
+        let value_reg = if reg::length(input_reg) == 0 {
+            let key = self.current_version.to_key();
+            reg::storage_read(&key, 1).expect("MISSING BINARY")
+        } else {
+            reg::storage_read_from_reg(input_reg, 1).expect("MISSING BINARY")
+        };
+
+        reg::value_return(value_reg);
+    }
+
+    pub fn current_version(&self) -> String {
+        self.current_version.to_string()
     }
 }

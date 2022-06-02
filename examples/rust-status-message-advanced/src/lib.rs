@@ -20,7 +20,7 @@ pub struct Message {
     text: String,
 }
 
-#[near_bindgen]
+#[near_bindgen("STATE")]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Contract {
     message: Message,
@@ -39,6 +39,7 @@ impl Default for Contract {
 #[near_bindgen]
 impl Contract {
     /// A change call to set the message
+    #[payable]
     pub fn set_message(&mut self, message: Message) {
         self.assert_owner();
         self.message = message;

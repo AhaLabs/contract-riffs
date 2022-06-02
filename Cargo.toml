@@ -1,15 +1,15 @@
 [package]
 edition = "2021"
-name = "bootme"
+name = "contract-utils"
 version = "0.1.0"
 publish = false
 
 [workspace]
 members = [
   "contracts/*",
-  "./util"
+  "examples/*"
 ]
-# exclude = ["util", "bootme"]
+
 
 [profile.release]
 codegen-units = 1
@@ -19,15 +19,21 @@ debug = false
 panic = "abort"
 overflow-checks = true
 
+[dependencies]
+near-sdk = { git = "https://github.com/ahalabs/near-sdk-rs", tag = "v4.0.0-3", features = ["unstable"]}
+near-units = "0.2.0"
+witgen = "0.12.0"
+
 [dev-dependencies]
 anyhow = "1.0"
+base64 = "0.13.0"
 lazy-static-include = "3.1.2"
-near-sdk = "4.0.0-pre.8"
-near-units = "0.2.0"
 proc-macro2 = { version = "1.0.36", features = ["span-locations"] }
 serde_json = "1.0"
 tokio = { version = "1.14", features = ["full"] }
 workspaces = "0.2.1"
+near-primitives = "0.12.0"
+
 
 [package.metadata.hackerman.stash.dev-dependencies]
 proc-macro2 = false

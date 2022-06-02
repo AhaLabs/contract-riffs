@@ -8,7 +8,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 # near-units = "0.2.0"
-contract-utils = {path = "../../util"}
+contract-utils = {path = "../.."}
 
 [dev-dependencies]
 witgen = "0.12.0"

@@ -5,9 +5,9 @@ use crate::{near_sdk::sys, reg};
 pub type FixedAccountId = [u8; 64];
 
 pub fn assert_private() {
-  let current_account_id = current_account_id();
-  let predecessor_account_id = predecessor_account_id();
-  require!(current_account_id == predecessor_account_id, "");
+    let current_account_id = current_account_id();
+    let predecessor_account_id = predecessor_account_id();
+    require!(current_account_id == predecessor_account_id, "");
 }
 
 pub fn predecessor_account_id() -> FixedAccountId {
@@ -46,9 +46,36 @@ pub fn create_promise_for_predecessor(register_id: u64) -> u64 {
     reg::promise_batch_create(register_id)
 }
 
-pub fn create_promise_for_current(register_id: u64) -> u64 {
+pub fn promise_batch_create_for_current(register_id: u64) -> u64 {
     unsafe {
         sys::current_account_id(register_id);
     };
     reg::promise_batch_create(register_id)
+}
+
+pub fn promise_create_for_current(
+    register_id: u64,
+    function_name: &str,
+    args: &[u8],
+    amount: u128,
+    gas: u64,
+) -> u64 {
+    unsafe {
+        sys::current_account_id(register_id);
+    };
+    reg::promise_create(register_id, function_name, args, amount, gas)
+}
+
+pub fn promise_then_for_current(
+    register_id: u64,
+    promise_index: u64,
+    function_name: &str,
+    args: &[u8],
+    amount: u128,
+    gas: u64,
+) -> u64 {
+    unsafe {
+        sys::current_account_id(register_id);
+    };
+    reg::promise_then(register_id, promise_index, function_name, args, amount, gas)
 }

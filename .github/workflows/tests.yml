@@ -19,7 +19,9 @@ jobs:
       - uses: Swatinem/rust-cache@v1
       - name: Add wasm32 target
         run: rustup target add wasm32-unknown-unknown
+      - name: Add raen
+        run: cargo install raen
       - name: build
-        run: cargo build --all --release --target wasm32-unknown-unknown --exclude contract-utils
+        run: raen build --all --release --exclude contract-utils
       - name: tests
         run: cargo test

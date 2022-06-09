@@ -4,14 +4,15 @@ pub mod account;
 pub mod deploy;
 pub mod lazy;
 pub mod owner;
+pub mod publish;
 pub mod reg;
 
 use near_sdk::{env, require};
 
 pub mod prelude {
-    pub use super::owner::*;
     pub use super::deploy::*;
     pub use super::lazy::Lazy;
+    pub use super::owner::*;
     pub use super::IntoKey;
 }
 

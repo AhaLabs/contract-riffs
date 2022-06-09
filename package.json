@@ -6,19 +6,20 @@
   "scripts": {
     "pretest": "npm run build:all && npm run lint",
     "build:testnet": "npm run build -- --features testnet",
-    "build": "cargo build --target wasm32-unknown-unknown --release ",
-    "build:all": "npm run build -- --all --exclude contract-utils --exclude bootme",
+    "build": "raen build --release ",
+    "build:all": "npm run build -- --all --exclude contract-utils",
     "test": "cargo test",
     "deploy:testnet": "npm run build:testnet && near repl -s ./scripts/deploy.ts",
     "deploy": "npm run build && near repl -s ./scripts/deploy.ts",
     "test:ci": "npm run test",
-    "lint": "eslint . --ext .ts"
+    "lint": "cargo clippy --tests -- -Dclippy::all"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.19.0",
     "@typescript-eslint/parser": "^5.19.0",
     "eslint": "^8.13.0",
     "near-cli": "git+https://github.com/ahalabs/near-cli#betav1",
+    "raen-cli": "^0.0.5",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.5"
   },

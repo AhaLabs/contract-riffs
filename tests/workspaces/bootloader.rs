@@ -1,3 +1,5 @@
+use near_units::parse_gas;
+
 use crate::utils::init;
 
 #[tokio::test]
@@ -24,7 +26,7 @@ async fn owner_can_transfer() -> anyhow::Result<()> {
         .await?
         .unwrap();
     let res = root
-        .call(worker, &bootloader.id(), "set_owner")
+        .call(worker, bootloader.id(), "set_owner")
         .args(alice.id().as_bytes().to_vec())
         .transact()
         .await?;
@@ -47,11 +49,33 @@ async fn non_owner_cannot_transfer() -> anyhow::Result<()> {
         .await?
         .unwrap();
     let res = alice
-        .call(worker, &bootloader.id(), "set_owner")
+        .call(worker, bootloader.id(), "set_owner")
         .args(alice.id().as_bytes().to_vec())
         .transact()
         .await;
     println!("{:#?}", res);
     assert!(res.is_err());
+    Ok(())
+}
+
+#[tokio::test]
+async fn can_redeploy() -> anyhow::Result<()> {
+    let worker = &workspaces::sandbox().await?;
+    let root = worker.root_account();
+    let (bootloader, registry) = init(worker, &root, true).await?;
+    let (contract, registry) = registry.unwrap();
+    println!("{}", registry.id());
+
+    let res = registry.view(worker, "current_version", vec![]).await?;
+
+    assert_eq!("v0_0_1".to_string(), res.json::<String>()?);
+
+    let res = root
+        .call(worker, bootloader.id(), "deploy")
+        .args(format!("v0_0_1.{}", contract.id()).as_bytes().to_vec())
+        .gas(parse_gas!("250 Tgas") as u64)
+        .transact()
+        .await;
+    println!("{:#?}", res);
     Ok(())
 }

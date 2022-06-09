@@ -28,7 +28,7 @@ dependencies = [
  "pin-project-lite",
  "smallvec",
  "tokio",
- "tokio-util 0.6.9",
+ "tokio-util 0.6.10",
 ]
 
 [[package]]
@@ -328,20 +328,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bootme"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "lazy-static-include",
- "near-sdk 4.0.0-pre.8",
- "near-units",
- "proc-macro2",
- "serde_json",
- "tokio",
- "workspaces",
-]
-
-[[package]]
 name = "borsh"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -557,9 +543,17 @@ dependencies = [
 name = "contract-utils"
 version = "0.1.0"
 dependencies = [
- "near-sdk 4.0.0-pre.7",
+ "anyhow",
+ "base64 0.13.0",
+ "lazy-static-include",
+ "near-primitives 0.12.0",
+ "near-sdk",
  "near-units",
+ "proc-macro2",
+ "serde_json",
+ "tokio",
  "witgen 0.12.0",
+ "workspaces",
 ]
 
 [[package]]
@@ -655,9 +649,9 @@ dependencies = [
 
 [[package]]
 name = "curl-sys"
-version = "0.4.54+curl-7.83.0"
+version = "0.4.55+curl-7.83.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "25debbc3365c3e7ee79e30918df5759e84dbd4485807a18829188abf1786ec4e"
+checksum = "23734ec77368ec583c2e61dd3f0b0e5c98b93abe6d2a004ca06b91dd7e3e2762"
 dependencies = [
  "cc",
  "libc",
@@ -1001,7 +995,7 @@ dependencies = [
  "indexmap",
  "slab",
  "tokio",
- "tokio-util 0.7.1",
+ "tokio-util 0.7.2",
  "tracing",
 ]
 
@@ -1072,9 +1066,9 @@ dependencies = [
 
 [[package]]
 name = "http-body"
-version = "0.4.4"
+version = "0.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ff4f84919677303da5f147645dbea6b1881f368d03ac84e1dc09031ebd7b2c6"
+checksum = "d5f38f16d184e36f2408a55281cd658ecbd3ca05cce6d6510a176eca393e26d1"
 dependencies = [
  "bytes",
  "http",
@@ -1742,32 +1736,14 @@ dependencies = [
  "borsh",
  "bs58",
  "near-primitives-core 0.10.0",
- "near-sdk-macros 4.0.0-pre.7",
- "near-sys 0.1.0 (git+https://github.com/ahalabs/near-sdk-rs?tag=v4.0.0-3)",
+ "near-sdk-macros",
+ "near-sys",
  "near-vm-logic",
  "once_cell",
  "serde",
  "serde_json",
  "wee_alloc",
  "witgen 0.11.0",
-]
-
-[[package]]
-name = "near-sdk"
-version = "4.0.0-pre.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e30889e853c3508ed83b0f507e3c947e3591810d44221b3899c7b407c484a2b2"
-dependencies = [
- "base64 0.13.0",
- "borsh",
- "bs58",
- "near-primitives-core 0.10.0",
- "near-sdk-macros 4.0.0-pre.8",
- "near-sys 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "near-vm-logic",
- "serde",
- "serde_json",
- "wee_alloc",
 ]
 
 [[package]]
@@ -1781,24 +1757,6 @@ dependencies = [
  "syn",
  "witgen_macro_helper 0.11.0",
 ]
-
-[[package]]
-name = "near-sdk-macros"
-version = "4.0.0-pre.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e104d6e4f4a85526c7b027c998f16cc5c27c30b691a3aed4cad57dd6414b90e"
-dependencies = [
- "Inflector",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "near-sys"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6a7aa3f46fac44416d8a93d14f30a562c4d730a1c6bf14bffafab5f475c244a"
 
 [[package]]
 name = "near-sys"
@@ -2497,12 +2455,12 @@ checksum = "73b4b750c782965c211b42f022f59af1fbceabdd026623714f104152f1ec149f"
 
 [[package]]
 name = "schannel"
-version = "0.1.19"
+version = "0.1.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f05ba609c234e60bee0d547fe94a4c7e9da733d1c962cf6e59efa4cd9c8bc75"
+checksum = "88d6731146462ea25d9244b2ed5fd1d716d25c52e4d54aa4fb0f3c4e9854dbe2"
 dependencies = [
  "lazy_static",
- "winapi",
+ "windows-sys",
 ]
 
 [[package]]
@@ -2614,9 +2572,9 @@ dependencies = [
 
 [[package]]
 name = "signal-hook"
-version = "0.3.13"
+version = "0.3.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "647c97df271007dcea485bb74ffdb57f2e683f1306c854f468a0c244badabf2d"
+checksum = "a253b5e89e2698464fc26b545c9edceb338e18a89effeeecfea192c3025be29d"
 dependencies = [
  "libc",
  "signal-hook-registry",
@@ -2901,9 +2859,9 @@ dependencies = [
 
 [[package]]
 name = "tokio-util"
-version = "0.6.9"
+version = "0.6.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e99e1983e5d376cd8eb4b66604d2e99e79f5bd988c3055891dcd8c9e2604cc0"
+checksum = "36943ee01a6d67977dd3f84a5a1d2efeb4ada3a1ae771cadfaa535d9d9fc6507"
 dependencies = [
  "bytes",
  "futures-core",
@@ -2915,9 +2873,9 @@ dependencies = [
 
 [[package]]
 name = "tokio-util"
-version = "0.7.1"
+version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0edfdeb067411dba2044da6d1cb2df793dd35add7888d73c16e3381ded401764"
+checksum = "f988a1a1adc2fb21f9c12aa96441da33a1728193ae0b95d2be22dbd17fcb4e5c"
 dependencies = [
  "bytes",
  "futures-core",

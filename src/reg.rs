@@ -92,27 +92,29 @@ pub fn storage_read_to_reg(key: &[u8], into_reg: u64) -> Option<u64> {
 }
 
 pub fn storage_read(key: &[u8]) -> Option<u64> {
-  storage_read_to_reg(key, Registers::StorageRead.into())
+    storage_read_to_reg(key, Registers::StorageRead.into())
 }
 
 pub fn storage_has_key(key_register: u64) -> bool {
     unsafe { sys::storage_has_key(u64::MAX, key_register) != 0 }
 }
 
+fn use_reg<F: FnOnce(u64)>(reg: Registers, f: F) -> u64 {
+    static mut READ_REGISTERS: [bool; 8] = [false; 8];
+    let reg_int = reg.into();
+    unsafe {
+        if !READ_REGISTERS[reg_int as usize] {
+            f(reg_int);
+            READ_REGISTERS[reg_int as usize] = true;
+        }
+        reg_int
+    }
+}
+
 // Context
 
 pub fn input() -> u64 {
-    let reg_id = Registers::Input.into();
-    unsafe {
-        static mut LOADED: bool = false;
-        if LOADED {
-            return reg_id;
-        } else {
-            sys::input(reg_id);
-            LOADED = true;
-        }
-    }
-    reg_id
+    use_reg(Registers::Input, |reg| unsafe { sys::input(reg) })
 }
 
 /// Returns the length of the input
@@ -121,9 +123,15 @@ pub fn input_len() -> u64 {
 }
 
 pub fn current_account_id() -> u64 {
-    let reg_id = Registers::CurrentAccountId.into();
-    unsafe { sys::current_account_id(reg_id) };
-    reg_id
+    use_reg(Registers::CurrentAccountId, |reg_id| unsafe {
+        sys::current_account_id(reg_id)
+    })
+}
+
+pub fn predecessor_account_id() -> u64 {
+    use_reg(Registers::PredecessorAccountId, |reg_id| unsafe {
+        sys::predecessor_account_id(reg_id)
+    })
 }
 
 // Promise
@@ -221,4 +229,8 @@ pub fn promise_batch_create_for_current() -> u64 {
 /// Returns promise_index
 pub fn promise_batch_action_deploy_contract_for_current(bytes_reg: u64) -> u64 {
     promise_batch_action_deploy_contract(promise_batch_create_for_current(), bytes_reg)
+}
+
+pub fn promise_batch_create_for_predecessor() -> u64 {
+    promise_batch_create(predecessor_account_id())
 }

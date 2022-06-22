@@ -53,8 +53,7 @@ impl Version {
 
     pub fn input_to_storage(&self) {
         let key = self.to_key();
-        reg::input(0);
-        reg::storage_write_from_reg(&key, 0);
+        reg::storage_write_from_input(&key);
     }
 
     pub fn to_key(&self) -> Vec<u8> {

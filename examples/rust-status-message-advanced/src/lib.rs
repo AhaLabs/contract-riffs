@@ -20,7 +20,7 @@ pub struct Message {
     text: String,
 }
 
-#[near_bindgen("STATE")]
+#[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Contract {
     message: Message,

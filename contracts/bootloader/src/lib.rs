@@ -20,6 +20,4 @@
 //! pub use super::IntoKey;
 //! ```
 
-//! ```
-
 pub use contract_utils::prelude::*;

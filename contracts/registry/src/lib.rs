@@ -68,15 +68,13 @@ impl Contract {
     }
 
     pub fn fetch(&self) {
-        let input_reg = 0;
-        reg::input(input_reg);
-
-        let value_reg = if reg::length(input_reg) == 0 {
+        reg::input();
+        let value_reg = if reg::input_len() == 0 {
             let key = self.current_version.to_key();
-            reg::storage_read(&key, 1).expect("MISSING BINARY")
+            reg::storage_read(&key)
         } else {
-            reg::storage_read_from_reg(input_reg, 1).expect("MISSING BINARY")
-        };
+            reg::storage_read_from_input()
+        }.expect("MISSING BINARY");
 
         reg::value_return(value_reg);
     }

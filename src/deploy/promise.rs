@@ -2,50 +2,27 @@ use near_sdk::{env, sys, Balance, Gas};
 
 use crate::account::{self, FixedAccountId};
 
-// pub fn promise_create_proxy(
-//     account_id: &FixedAccountId,
-//     function_name: &str,
-//     // arguments: &[u8],
-//     amount: Balance,
-//     gas: Gas,
-// ) -> u64 {
-//     // let account_id = account_id.as_bytes();
-//     unsafe {
-//         sys::input(3);
-//         sys::promise_create(
-//             account_id.len() as _,
-//             account_id.as_ptr() as _,
-//             function_name.len() as _,
-//             function_name.as_ptr() as _,
-//             u64::MAX,
-//             3,
-//             &amount as *const Balance as _,
-//             gas.0,
-//         )
-//     }
-// }
-
 pub fn promise_create_proxy(
-  account_id: &str,
-  function_name: &str,
-  // arguments: &[u8],
-  amount: Balance,
-  gas: Gas,
+    account_id: &str,
+    function_name: &str,
+    // arguments: &[u8],
+    amount: Balance,
+    gas: Gas,
 ) -> u64 {
-  // let account_id = account_id.as_bytes();
-  unsafe {
-      sys::input(3);
-      sys::promise_create(
-          account_id.len() as _,
-          account_id.as_ptr() as _,
-          function_name.len() as _,
-          function_name.as_ptr() as _,
-          u64::MAX,
-          3,
-          &amount as *const Balance as _,
-          gas.0,
-      )
-  }
+    // let account_id = account_id.as_bytes();
+    unsafe {
+        sys::input(3);
+        sys::promise_create(
+            account_id.len() as _,
+            account_id.as_ptr() as _,
+            function_name.len() as _,
+            function_name.as_ptr() as _,
+            u64::MAX,
+            3,
+            &amount as *const Balance as _,
+            gas.0,
+        )
+    }
 }
 
 pub fn promise_then(

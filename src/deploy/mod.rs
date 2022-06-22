@@ -1,4 +1,4 @@
-use crate::{reg, account::assert_private,owner::Owner};
+use crate::{account::assert_private, owner::Owner, reg};
 use near_units::parse_gas;
 
 pub mod promise;
@@ -25,7 +25,9 @@ pub fn deploy() {
 pub fn _deploy() {
     assert_private();
     let bytes_reg = reg::load_promise_result(0, 0);
-    env::promise_return(reg::promise_batch_action_deploy_contract_for_current(bytes_reg))
+    env::promise_return(reg::promise_batch_action_deploy_contract_for_current(
+        bytes_reg,
+    ))
 }
 
 fn parse_input() -> (Vec<u8>, AccountId) {

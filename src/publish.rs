@@ -1,4 +1,4 @@
-use crate::{deploy::promise::promise_create_proxy, owner::Owner, near_sdk::env};
+use crate::{deploy::promise::promise_create_proxy, near_sdk::env, owner::Owner};
 
 use near_sdk::Gas;
 use near_units::parse_gas;

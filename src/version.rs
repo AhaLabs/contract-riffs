@@ -3,7 +3,7 @@ use std::fmt::Display;
 use crate::{
     near_sdk::{
         borsh::{self, BorshDeserialize, BorshSerialize},
-        serde::{Serialize},
+        serde::Serialize,
     },
     reg,
 };
@@ -18,17 +18,16 @@ pub struct Version {
 
 #[allow(dead_code)]
 mod private {
-  #[witgen::witgen]
-  /// Represents the version of the contract
-  type Version = String;
+    #[witgen::witgen]
+    /// Represents the version of the contract
+    type Version = String;
 }
-  
-
 
 impl Serialize for Version {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: near_sdk::serde::Serializer {
+        S: near_sdk::serde::Serializer,
+    {
         serializer.serialize_str(&self.to_string())
     }
 }

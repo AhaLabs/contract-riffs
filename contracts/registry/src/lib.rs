@@ -5,8 +5,8 @@ use contract_utils::{
         collections::Vector,
         near_bindgen,
     },
-    version::Version,
     refund_storage_cost, reg,
+    version::Version,
 };
 
 use contract_utils::prelude::*;
@@ -66,21 +66,23 @@ impl Contract {
     fn current(&self) -> Version {
         let len = self.versions.len();
         if len == 0 {
-          Version::default();
+            Version::default()
+        } else {
+            self.versions
+                .get(len - 1)
+                .expect("failed to get current version")
         }
-        self.versions.get(len - 1).expect("failed to get current version")
     }
 
     fn input_to_storage(&mut self, new_version: Version) {
-      refund_storage_cost(|| {
-        new_version.input_to_storage();
-        self.versions.push(&new_version);
-      })
+        refund_storage_cost(|| {
+            new_version.input_to_storage();
+            self.versions.push(&new_version);
+        })
     }
 
     /// Current version of the contract
     pub fn current_version(&self) -> String {
-      self.current().to_string()
-  }
-
+        self.current().to_string()
+    }
 }

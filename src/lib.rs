@@ -6,6 +6,7 @@ pub mod lazy;
 pub mod owner;
 pub mod publish;
 pub mod reg;
+pub mod version;
 
 use near_sdk::{env, require};
 

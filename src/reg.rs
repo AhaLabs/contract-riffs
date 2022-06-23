@@ -147,7 +147,7 @@ pub fn promise_batch_action_deploy_contract(promise_index: u64, bytes_reg: u64) 
     bytes_reg
 }
 
-pub fn promise_create(
+pub fn promise_create_account_from_reg(
     account_id_reg: u64,
     function_name: &str,
     args: &[u8],
@@ -166,6 +166,37 @@ pub fn promise_create(
             gas,
         )
     }
+}
+
+pub fn promise_create_args_from_reg(
+    account_id: &str,
+    function_name: &str,
+    args_reg_id: u64,
+    amount: u128,
+    gas: u64,
+) -> u64 {
+    unsafe {
+        sys::promise_create(
+            account_id.len() as _,
+            account_id.as_ptr() as _,
+            function_name.len() as _,
+            function_name.as_ptr() as _,
+            u64::MAX,
+            args_reg_id,
+            &amount as *const u128 as _,
+            gas,
+        )
+    }
+}
+
+/// Create a promise where the arguments are from input
+pub fn promise_create_args_from_input(
+    account_id: &str,
+    function_name: &str,
+    amount: u128,
+    gas: u64,
+) -> u64 {
+    promise_create_args_from_reg(account_id, function_name, input(), amount, gas)
 }
 
 pub fn promise_then(
@@ -219,7 +250,7 @@ pub fn promise_then_for_current(
 }
 
 pub fn promise_create_for_current(function_name: &str, args: &[u8], amount: u128, gas: u64) -> u64 {
-    promise_create(current_account_id(), function_name, args, amount, gas)
+    promise_create_account_from_reg(current_account_id(), function_name, args, amount, gas)
 }
 
 pub fn promise_batch_create_for_current() -> u64 {

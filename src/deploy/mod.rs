@@ -24,7 +24,7 @@ pub fn deploy() {
 #[no_mangle]
 pub fn _deploy() {
     assert_private();
-    let bytes_reg = reg::load_promise_result(0, 0);
+    let bytes_reg = reg::promise_result(0, 0);
     env::promise_return(reg::promise_batch_action_deploy_contract_for_current(
         bytes_reg,
     ))

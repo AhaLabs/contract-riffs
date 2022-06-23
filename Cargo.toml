@@ -22,7 +22,7 @@ overflow-checks = true
 [dependencies]
 near-sdk = { git = "https://github.com/ahalabs/near-sdk-rs", tag = "v4.0.0-3", features = ["unstable"]}
 near-units = "0.2.0"
-witgen = "0.12.0"
+witgen = "0.14.0"
 
 [dev-dependencies]
 anyhow = "1.0"
@@ -31,7 +31,7 @@ lazy-static-include = "3.1.2"
 proc-macro2 = { version = "1.0.36", features = ["span-locations"] }
 serde_json = "1.0"
 tokio = { version = "1.14", features = ["full"] }
-workspaces = "0.2.1"
+workspaces = "0.3.1"
 near-primitives = "0.12.0"
 
 

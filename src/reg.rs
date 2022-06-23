@@ -192,9 +192,9 @@ pub fn promise_then(
 }
 
 /// Returns register
-pub fn load_promise_result(index: u64, reg_id: u64) -> u64 {
+pub fn promise_result(index: u64, reg_id: u64) -> u64 {
     match unsafe { sys::promise_result(index, reg_id) } {
-        1 => 1,
+        1 => reg_id,
         _ => env::panic_str("promise failed"),
     }
 }

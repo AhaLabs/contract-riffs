@@ -7,6 +7,7 @@ use workspaces::{Account, Contract, DevNetwork, Worker};
 lazy_static_include::lazy_static_include_bytes! {
   pub BOOTLOADER => "./target/res/bootloader.wasm",
   pub REGISTRY => "./target/res/contract_registry.wasm",
+  pub STATUS_MESSAGE => "./target/res/status_message.wasm",
 }
 
 pub fn try_into_bytes(details: CallExecutionDetails) -> anyhow::Result<Vec<u8>> {
@@ -70,7 +71,7 @@ pub async fn init(
 
         let res = root
             .call(worker, registry.id(), "patch")
-            .args(BOOTLOADER.to_vec())
+            .args(STATUS_MESSAGE.to_vec())
             .gas(300_000_000_000_000)
             .deposit(parse_near!("1N"))
             .transact()

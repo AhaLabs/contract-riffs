@@ -11,7 +11,7 @@ const DEPLOY_GAS: u64 = parse_gas!("70 TGas") as u64;
 pub fn deploy() {
     Owner::assert();
     let (arguments, account_id) = parse_input();
-    let id = promise::promise_create(&account_id, "fetch", &arguments, 0, FETCH_GAS);
+    let id = promise::promise_create(account_id.as_str(), "fetch", &arguments, 0, FETCH_GAS);
     env::promise_return(reg::promise_then_for_current(
         id,
         "_deploy",

@@ -167,13 +167,14 @@ pub async fn init_with_launcher(
         .batch(worker, launcher.id())
         .call(Function::new("update").args_json(json! ({
           "registry": registry.id(),
-          "network": bootloader.id(),
+          "root_account": bootloader.id(),
         }))?)
         .transact()
         .await?;
-
+    
     println!("Updated {:#?}", res);
     assert!(res.is_success(), "Failed to set registry owner");
+    println!("{}", worker.view(launcher.id(), "accounts", vec![]).await?.json::<Value>()?);
     // root.batch(&worker, &format!("registry.{}", root.id()).parse()?)
     //     .create_account()
     //     .transfer(parse_near!("10 N"))

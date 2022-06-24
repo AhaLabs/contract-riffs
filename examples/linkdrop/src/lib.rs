@@ -5,7 +5,7 @@ use contract_utils::{
         collections::UnorderedMap,
         env, ext_contract,
         json_types::U128,
-        near_bindgen, require, AccountId, Balance, Gas, PanicOnDefault, Promise, PromiseResult,
+        near_bindgen, require, AccountId, Balance, Gas, Promise, PromiseResult,
         PublicKey,
     },
     near_units::parse_near,

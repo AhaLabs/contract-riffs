@@ -101,7 +101,7 @@ async fn can_launch() -> anyhow::Result<()> {
     let worker = &workspaces::sandbox().await?;
     let testnet = &workspaces::testnet().await?;
     let testnet = worker
-        .import_contract(&"testnet".parse().unwrap(), testnet)
+        .import_contract(&"tn".parse().unwrap(), testnet)
         .initial_balance(parse_near!("1000 N"))
         .transact()
         .await?;
@@ -128,7 +128,7 @@ async fn can_launch() -> anyhow::Result<()> {
     //     .await?;
     // println!("{:#?}\nDeployed", res.outcome());
     // assert!(res.is_success());
-    let new_account_id = "test.bootloader.testnet";
+    let new_account_id = "test.bootloader.tn";
     let new_account = json!({ "account_id": new_account_id });
     let res = root
         .call(worker, launcher.id(), "launch")

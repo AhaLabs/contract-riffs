@@ -5,22 +5,21 @@ use contract_utils::{
         collections::Vector,
         near_bindgen,
     },
-    owner::*,
-    publish::Version,
     refund_storage_cost, reg,
+    version::Version,
 };
+
+use contract_utils::prelude::*;
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Contract {
-    current_version: Version,
     versions: Vector<Version>,
 }
 
 impl Default for Contract {
     fn default() -> Self {
         Self {
-            current_version: Default::default(),
             versions: Vector::new(b"v"),
         }
     }
@@ -32,56 +31,58 @@ impl Contract {
     #[payable]
     pub fn patch(&mut self) {
         self.assert_owner();
-        self.current_version.publish_patch();
-        refund_storage_cost(
-            || {
-                self.current_version.input_to_storage();
-            },
-            10,
-        );
+        self.input_to_storage(self.current().publish_patch())
     }
 
     /// Non-breaking feature
     #[payable]
     pub fn minor(&mut self) {
         self.assert_owner();
-        self.current_version.publish_minor();
-        refund_storage_cost(
-            || {
-                self.current_version.input_to_storage();
-            },
-            10,
-        );
+        self.input_to_storage(self.current().publish_minor())
     }
 
     /// Breaking change
     #[payable]
     pub fn major(&mut self) {
         self.assert_owner();
-        self.current_version.publish_major();
-        refund_storage_cost(
-            || {
-                self.current_version.input_to_storage();
-            },
-            10,
-        );
+        self.input_to_storage(self.current().publish_major())
     }
 
+    /// Fetch a version of the contract
+    /// If no argument provided use current version
     pub fn fetch(&self) {
-        let input_reg = 0;
-        reg::input(input_reg);
-
-        let value_reg = if reg::length(input_reg) == 0 {
-            let key = self.current_version.to_key();
-            reg::storage_read(&key, 1).expect("MISSING BINARY")
+        let value_reg = if reg::input_len() == 0 {
+            let key = self.current().to_key();
+            reg::storage_read(&key)
         } else {
-            reg::storage_read_from_reg(input_reg, 1).expect("MISSING BINARY")
-        };
+            reg::storage_read_from_input()
+        }
+        .expect("MISSING BINARY");
 
         reg::value_return(value_reg);
     }
 
+    /// Current version of the contract
+    fn current(&self) -> Version {
+        let len = self.versions.len();
+        if len == 0 {
+            Version::default()
+        } else {
+            self.versions
+                .get(len - 1)
+                .expect("failed to get current version")
+        }
+    }
+
+    fn input_to_storage(&mut self, new_version: Version) {
+        refund_storage_cost(|| {
+            new_version.input_to_storage();
+            self.versions.push(&new_version);
+        })
+    }
+
+    /// Current version of the contract
     pub fn current_version(&self) -> String {
-        self.current_version.to_string()
+        self.current().to_string()
     }
 }

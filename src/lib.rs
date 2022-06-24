@@ -6,6 +6,7 @@ pub mod lazy;
 pub mod owner;
 pub mod publish;
 pub mod reg;
+pub mod version;
 
 use near_sdk::{env, require};
 
@@ -34,10 +35,10 @@ pub fn left_over_balance<F: FnOnce()>(f: F) -> u128 {
     attached_deposit - cost
 }
 
-pub fn refund_storage_cost<F: FnOnce()>(f: F, register_id: u64) {
+pub fn refund_storage_cost<F: FnOnce()>(f: F) {
     let amount_to_refund = left_over_balance(f);
     if 0 < amount_to_refund {
-        let promise_index = account::create_promise_for_predecessor(register_id);
+        let promise_index = reg::promise_batch_create_for_predecessor();
         env::promise_batch_action_transfer(promise_index, amount_to_refund)
     }
 }

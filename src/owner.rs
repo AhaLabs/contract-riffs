@@ -83,14 +83,12 @@ impl Owner {
             Owner::assert()
         }
         let mut container = Owner::get_lazy();
-        container.set_reg(reg::input(0))
+        container.set_reg(reg::input())
     }
 
     pub fn get() -> Option<FixedAccountId> {
-        Owner::is_set().then(|| {
-            reg::storage_read(OWNER_KEY.as_bytes(), 0);
-            account::read_register(0)
-        })
+        Owner::is_set()
+            .then(|| account::read_register(reg::storage_read(OWNER_KEY.as_bytes()).unwrap()))
     }
 
     pub fn get_str() -> String {

@@ -29,8 +29,8 @@ impl IntoKey for Message {
 #[no_mangle]
 pub fn update_message() {
     // any type can assert owner (weird Rust ;-))
-    0u8.assert_owner();
-    
+    "a".assert_owner();
+
     // Deserialize input into Message
     let msg: Message = near_sdk::serde_json::from_slice(
         &near_sdk::env::input().expect("Expected input since method has arguments."),
@@ -39,11 +39,11 @@ pub fn update_message() {
 
     // set new message and get old message
     let old_message = Message::set_lazy(msg);
-    
+
     // Serialize old message
     let result = near_sdk::serde_json::to_vec(&old_message)
         .expect("Failed to serialize the return value using JSON.");
-    
+
     // Return serailazed result
     near_sdk::env::value_return(&result)
 }

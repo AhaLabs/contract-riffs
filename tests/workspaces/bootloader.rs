@@ -1,4 +1,5 @@
 use near_units::parse_gas;
+use serde_json::{json, Value};
 
 use crate::utils::init;
 
@@ -75,7 +76,20 @@ async fn can_redeploy() -> anyhow::Result<()> {
         .args(format!("v0_0_1.{}", contract.id()).as_bytes().to_vec())
         .gas(parse_gas!("250 Tgas") as u64)
         .transact()
-        .await;
+        .await?;
+    println!("{:#?}\nDeployed", res.outcome());
+    assert!(res.is_success());
+    let hello = json!({ "text": "hello world" });
+    let res = root
+        .call(worker, bootloader.id(), "update_message")
+        .args_json(hello.clone())?
+        .transact()
+        .await?;
+
+    let res = bootloader
+        .view(worker, "get_message", vec![])
+        .await?.json::<Value>()?;
     println!("{:#?}", res);
+    assert_eq!(res, hello);
     Ok(())
 }

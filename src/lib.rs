@@ -1,11 +1,14 @@
 pub use near_sdk;
 pub use near_units;
+pub use witgen::witgen;
+
 pub mod account;
 pub mod deploy;
 pub mod lazy;
 pub mod owner;
 pub mod publish;
 pub mod reg;
+#[cfg(feature  = "version")]
 pub mod version;
 
 use near_sdk::{env, require};

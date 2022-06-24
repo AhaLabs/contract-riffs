@@ -1,11 +1,14 @@
 [package]
 authors = ["Willem Wyndham <willem@near.org>"]
 edition = "2021"
-name = "contract-registry"
+name = "contract-launcher"
 version = "0.1.0"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-contract-utils = { path = "../..", features = ["version"]}
+contract-utils = { path = "../.." }
+
+[features]
+testnet = []

@@ -6,8 +6,7 @@
   "scripts": {
     "pretest": "npm run build:all && npm run lint",
     "build:testnet": "npm run build -- --features testnet",
-    "build": "raen build --release ",
-    "build:all": "npm run build -- --all --exclude contract-utils",
+    "build": "raen build --release --all --exclude contract-utils ",
     "test": "cargo test",
     "deploy:testnet": "npm run build:testnet && near repl -s ./scripts/deploy.ts",
     "deploy": "npm run build && near repl -s ./scripts/deploy.ts",

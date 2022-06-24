@@ -1,8 +1,10 @@
-use contract_utils::near_sdk::{
-    self,
-    borsh::{self, BorshDeserialize, BorshSerialize},
-    near_bindgen,
-    serde::{Deserialize, Serialize},
+use contract_utils::{
+    near_sdk::{
+        self,
+        borsh::{self, BorshDeserialize, BorshSerialize},
+        near_bindgen,
+        serde::{Deserialize, Serialize},
+    },
     witgen,
 };
 

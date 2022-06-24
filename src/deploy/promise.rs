@@ -89,3 +89,30 @@ pub fn promise_result() -> u64 {
         _ => env::panic_str("promise failed"),
     }
 }
+
+// ################
+// # Promises API #
+// ################
+/// Creates a promise that will execute a method on account with given arguments and attaches
+/// the given amount and gas.
+pub fn promise_create(
+  account_id: &str,
+  function_name: &str,
+  arguments: &[u8],
+  amount: Balance,
+  gas: u64,
+) -> u64 {
+  let account_id = account_id.as_bytes();
+  unsafe {
+      sys::promise_create(
+          account_id.len() as _,
+          account_id.as_ptr() as _,
+          function_name.len() as _,
+          function_name.as_ptr() as _,
+          arguments.len() as _,
+          arguments.as_ptr() as _,
+          &amount as *const Balance as _,
+          gas,
+      )
+  }
+}

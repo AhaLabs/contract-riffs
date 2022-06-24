@@ -1,4 +1,6 @@
+use anyhow::Result;
 use near_units::{parse_gas, parse_near};
+use serde_json::{json, Value};
 use workspaces::operations::Function;
 use workspaces::prelude::*;
 use workspaces::result::{CallExecutionDetails, ValueOrReceiptId};
@@ -27,7 +29,7 @@ pub async fn init(
     worker: &Worker<impl DevNetwork>,
     root: &Account,
     init_registry: bool,
-) -> anyhow::Result<(Contract, Option<(Account, Contract)>)> {
+) -> Result<(Contract, Option<(Account, Contract)>)> {
     let bootloader = worker.dev_deploy(&BOOTLOADER).await?;
     let owner_bytes = root.id().as_bytes().to_vec();
     let res = root
@@ -101,12 +103,28 @@ pub async fn init(
     Ok((bootloader, registry))
 }
 
+pub async fn deploy(
+    worker: &Worker<impl DevNetwork>,
+    bytes: &[u8],
+    owner: &Account,
+    account: &Account,
+) -> Result<Contract> {
+    let account = worker.dev_deploy(bytes).await;
+    account.map(|contract| {
+        contract.call(worker, "set_owner");
+        contract
+    })
+}
+
 pub async fn init_with_launcher(
     worker: &Worker<impl DevNetwork>,
     root: &Account,
-    init_registry: bool,
-) -> anyhow::Result<(Contract, Option<(Account, Contract)>)> {
+    bootloader: &Account,
+) -> Result<(Contract, Contract)> {
+    let res = bootloader.deploy(worker, &NEAR_WASM).await?.unwrap();
+
     let launcher = worker.dev_deploy(&CONTRACT_LAUNCHER).await?;
+
     let owner_bytes = root.id().as_bytes().to_vec();
     let res = root
         .call(worker, launcher.id(), "set_owner")
@@ -116,78 +134,77 @@ pub async fn init_with_launcher(
         .await?;
 
     assert!(res.is_success(), "set owner");
+    // let sk = SecretKey::from_seed(KeyType::ED25519, "near_seed");
 
-    let registry = if init_registry {
-        let sk = SecretKey::from_seed(KeyType::ED25519, "near_seed");
+    // let testnet = worker
+    //     .create_tla_and_deploy("testnet".parse()?, sk, &NEAR_WASM)
+    //     .await?
+    //     .unwrap();
+    // let bootloader = testnet
+    //     .as_account()
+    //     .create_subaccount(worker, "bootloader")
+    //     .initial_balance(parse_near!("20 N"))
+    //     .transact()
+    //     .await?
+    //     .unwrap();
+    let registry = bootloader
+        .create_subaccount(worker, "registry")
+        .initial_balance(parse_near!("9 N"))
+        .transact()
+        .await?
+        .unwrap();
+    let registry = registry.deploy(worker, &REGISTRY).await?.unwrap();
 
-        // let testnet = worker
-        //     .create_tla_and_deploy("testnet".parse()?, sk, &NEAR_WASM)
-        //     .await?
-        //     .unwrap();
-        let contrct = Contract::new()
-        let bootloader = testnet
-            .as_account()
-            .create_subaccount(worker, "bootloader")
-            .initial_balance(parse_near!("20 N"))
-            .transact()
-            .await?
-            .unwrap();
-        let registry = bootloader
-            .create_subaccount(worker, "registry")
-            .initial_balance(parse_near!("10 N"))
-            .transact()
-            .await?
-            .unwrap();
-        let registry = registry.deploy(worker, &REGISTRY).await?.unwrap();
+    let res = root
+        .call(worker, registry.id(), "set_owner")
+        .args(bootloader.id().as_bytes().to_vec())
+        .gas(300_000_000_000_000)
+        // .deposit(parse_near!("1N"))
+        .transact()
+        .await?;
 
-        let res = root
-            .call(worker, registry.id(), "set_owner")
-            .args(bootloader.id().as_bytes().to_vec())
-            .gas(300_000_000_000_000)
-            // .deposit(parse_near!("1N"))
-            .transact()
-            .await?;
-        assert!(res.is_success(), "Failed to set registry owner");
-        // root.batch(&worker, &format!("registry.{}", root.id()).parse()?)
-        //     .create_account()
-        //     .transfer(parse_near!("10 N"))
-        //     .call(Function {
-        //         name: "set_owner",
-        //         args: root.id().as_bytes().to_vec(),
-        //         deposit: 0,
-        //         gas: parse_gas!("100 Tgas") as _,
-        //     });
-        // let registry = worker.dev_deploy(&REGISTRY).await?;
+    let res = root
+        .batch(worker, launcher.id())
+        .call(Function::new("update").args_json(json! ({
+          "registry": registry.id(),
+          "network": bootloader.id(),
+        }))?)
+        .transact()
+        .await?;
 
-        let res = bootloader
-            .call(worker, registry.id(), "patch")
-            .args(BOOTLOADER.to_vec())
-            .gas(300_000_000_000_000)
-            .deposit(parse_near!("1N"))
-            .transact()
-            .await?;
-        println!("{:#?}", res);
-        assert!(res.is_success(), "uploaded bootloader bytes");
-        // let boot_bytes = try_into_bytes(res)?;
+    println!("Updated {:#?}", res);
+    assert!(res.is_success(), "Failed to set registry owner");
+    // root.batch(&worker, &format!("registry.{}", root.id()).parse()?)
+    //     .create_account()
+    //     .transfer(parse_near!("10 N"))
+    //     .call(Function {
+    //         name: "set_owner",
+    //         args: root.id().as_bytes().to_vec(),
+    //         deposit: 0,
+    //         gas: parse_gas!("100 Tgas") as _,
+    //     });
+    // let registry = worker.dev_deploy(&REGISTRY).await?;
 
-        // let res = root
-        //     .call(worker, registry.id(), "upload")
-        //     .args(REGISTRY.to_vec())
-        //     .gas(300_000_000_000_000)
-        //     .deposit(parse_near!("1N"))
-        //     .transact()
-        //     .await?;
+    let res = bootloader
+        .call(worker, registry.id(), "patch")
+        .args(BOOTLOADER.to_vec())
+        .gas(300_000_000_000_000)
+        .deposit(parse_near!("1N"))
+        .transact()
+        .await?;
+    println!("{:#?}", res);
+    assert!(res.is_success(), "uploaded bootloader bytes");
+    // let boot_bytes = try_into_bytes(res)?;
 
-        // assert!(res.is_success(), "uploaded registry bytes");
-        Some((bootloader, registry))
-    } else {
-        None
-    };
+    // let res = root
+    //     .call(worker, registry.id(), "upload")
+    //     .args(REGISTRY.to_vec())
+    //     .gas(300_000_000_000_000)
+    //     .deposit(parse_near!("1N"))
+    //     .transact()
+    //     .await?;
+
+    // assert!(res.is_success(), "uploaded registry bytes");
 
     Ok((launcher, registry))
 }
-
-pub async fn patch_contract(
-  worker: &Worker<impl DevNetwork>){
-    worker.
-  }

@@ -1,16 +1,28 @@
-use contract_utils::near_sdk::{
-    self,
-    borsh::{self, BorshDeserialize, BorshSerialize},
-    collections::UnorderedMap,
-    env, ext_contract,
-    json_types::U128,
-    near_bindgen, AccountId, Balance, Gas, PanicOnDefault, Promise, PromiseResult, PublicKey,
+use contract_utils::{
+    near_sdk::{
+        self,
+        borsh::{self, BorshDeserialize, BorshSerialize},
+        collections::UnorderedMap,
+        env, ext_contract,
+        json_types::U128,
+        near_bindgen, require, AccountId, Balance, Gas, PanicOnDefault, Promise, PromiseResult,
+        PublicKey,
+    },
+    near_units::parse_near,
 };
 
 #[near_bindgen]
-#[derive(PanicOnDefault, BorshDeserialize, BorshSerialize)]
+#[derive(BorshDeserialize, BorshSerialize)]
 pub struct LinkDrop {
     pub accounts: UnorderedMap<PublicKey, Balance>,
+}
+
+impl Default for LinkDrop {
+    fn default() -> Self {
+        Self {
+            accounts: UnorderedMap::new(b"a"),
+        }
+    }
 }
 
 /// Access key allowance for linkdrop keys.
@@ -18,6 +30,10 @@ const ACCESS_KEY_ALLOWANCE: u128 = 1_000_000_000_000_000_000_000_000;
 
 /// Gas attached to the callback from account creation.
 pub const ON_CREATE_ACCOUNT_CALLBACK_GAS: Gas = Gas(20_000_000_000_000);
+
+pub const DEPLOY_INIT_GAS: Gas = Gas(20_000_000_000_000);
+
+pub const MIN_DEPLOY_DEPOSIT: Balance = parse_near!("6 N");
 
 /// Methods callable by the function call access key
 const ACCESS_KEY_METHOD_NAMES: &str = "claim,create_account_and_claim";
@@ -45,14 +61,6 @@ fn is_promise_success() -> bool {
 
 #[near_bindgen]
 impl LinkDrop {
-    /// Initializes the contract with an empty map for the accounts
-    #[init]
-    pub fn new() -> Self {
-        Self {
-            accounts: UnorderedMap::new(b"a"),
-        }
-    }
-
     /// Allows given public key to claim sent balance.
     /// Takes ACCESS_KEY_ALLOWANCE as fee from deposit to cover account creation via an access key.
     #[payable]
@@ -147,6 +155,43 @@ impl LinkDrop {
             )
     }
 
+    /// Create new account without linkdrop and deposit passed funds (used for creating sub accounts directly).
+    /// Then Deploy a contract and optionally call an init method
+    #[payable]
+    pub fn create_account_and_deploy(
+        &mut self,
+        new_account_id: AccountId,
+        new_public_key: PublicKey,
+        bytes: Vec<u8>,
+        init_method: Option<String>,
+        args: Option<Vec<u8>>,
+    ) -> Promise {
+        let amount = env::attached_deposit();
+        require!(
+            amount >= MIN_DEPLOY_DEPOSIT,
+            "Requires at least 6N to deploy"
+        );
+        let mut promise = Promise::new(new_account_id)
+            .create_account()
+            .add_full_access_key(new_public_key.into())
+            .transfer(amount)
+            .deploy_contract(bytes);
+        if let Some(function_name) = init_method {
+            promise = promise.function_call(
+                function_name,
+                args.unwrap_or_else(|| vec![]),
+                0,
+                DEPLOY_INIT_GAS,
+            );
+        }
+
+        promise.then(
+            Self::ext(env::current_account_id())
+                .with_static_gas(ON_CREATE_ACCOUNT_CALLBACK_GAS)
+                .on_account_created(env::predecessor_account_id(), amount.into()),
+        )
+    }
+
     /// Callback after executing `create_account`.
     pub fn on_account_created(&mut self, predecessor_account_id: AccountId, amount: U128) -> bool {
         assert_eq!(
@@ -208,7 +253,7 @@ mod tests {
     #[test]
     fn test_create_account() {
         // Create a new instance of the linkdrop contract
-        let mut contract = LinkDrop::new();
+        let mut contract = LinkDrop::default();
         // Create the public key to be used in the test
         let pk: PublicKey = "qSq3LoufLvTCTNGC3LJePMDGrok8dHMQ5A1YD9psbiz"
             .parse()
@@ -231,7 +276,7 @@ mod tests {
     #[should_panic]
     fn test_create_invalid_account() {
         // Create a new instance of the linkdrop contract
-        let mut contract = LinkDrop::new();
+        let mut contract = LinkDrop::default();
         // Create the public key to be used in the test
         let pk: PublicKey = "qSq3LoufLvTCTNGC3LJePMDGrok8dHMQ5A1YD9psbiz"
             .parse()
@@ -254,7 +299,7 @@ mod tests {
     #[should_panic]
     fn test_get_missing_balance_panics() {
         // Create a new instance of the linkdrop contract
-        let contract = LinkDrop::new();
+        let contract = LinkDrop::default();
         // Create the public key to be used in the test
         let pk: PublicKey = "qSq3LoufLvTCTNGC3LJePMDGrok8dHMQ5A1YD9psbiz"
             .parse()
@@ -272,7 +317,7 @@ mod tests {
     #[test]
     fn test_get_missing_balance_success() {
         // Create a new instance of the linkdrop contract
-        let mut contract = LinkDrop::new();
+        let mut contract = LinkDrop::default();
         // Create the public key to be used in the test
         let pk: PublicKey = "qSq3LoufLvTCTNGC3LJePMDGrok8dHMQ5A1YD9psbiz"
             .parse()
@@ -299,7 +344,7 @@ mod tests {
     #[should_panic]
     fn test_claim_invalid_account() {
         // Create a new instance of the linkdrop contract
-        let mut contract = LinkDrop::new();
+        let mut contract = LinkDrop::default();
         // Create the public key to be used in the test
         let pk: PublicKey = "qSq3LoufLvTCTNGC3LJePMDGrok8dHMQ5A1YD9psbiz"
             .parse()
@@ -337,7 +382,7 @@ mod tests {
     #[test]
     fn test_drop_claim() {
         // Create a new instance of the linkdrop contract
-        let mut contract = LinkDrop::new();
+        let mut contract = LinkDrop::default();
         // Create the public key to be used in the test
         let pk: PublicKey = "qSq3LoufLvTCTNGC3LJePMDGrok8dHMQ5A1YD9psbiz"
             .parse()
@@ -375,7 +420,7 @@ mod tests {
     #[test]
     fn test_send_two_times() {
         // Create a new instance of the linkdrop contract
-        let mut contract = LinkDrop::new();
+        let mut contract = LinkDrop::default();
         // Create the public key to be used in the test
         let pk: PublicKey = "qSq3LoufLvTCTNGC3LJePMDGrok8dHMQ5A1YD9psbiz"
             .parse()

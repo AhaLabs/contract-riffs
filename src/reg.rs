@@ -8,7 +8,7 @@ pub enum Registers {
     CurrentAccountId = 2,
     PredecessorAccountId = 3,
     SignerAccountId = 4,
-    SignerAccountPK = 5,
+    SignerAccountPk = 5,
     StorageRead = 6,
     StorageWriteEviction = 7,
 }
@@ -117,6 +117,12 @@ pub fn input() -> u64 {
     use_reg(Registers::Input, |reg| unsafe { sys::input(reg) })
 }
 
+pub fn signer_account_pk() -> u64 {
+    use_reg(Registers::SignerAccountPk, |reg| unsafe {
+        sys::signer_account_pk(reg)
+    })
+}
+
 /// Returns the length of the input
 pub fn input_len() -> u64 {
     env::register_len(input()).unwrap()
@@ -145,6 +151,17 @@ pub fn promise_batch_action_deploy_contract(promise_index: u64, bytes_reg: u64) 
         sys::promise_batch_action_deploy_contract(promise_index, u64::MAX, bytes_reg);
     };
     bytes_reg
+}
+
+pub fn promise_batch_action_delete_key(promise_index: u64, public_key_reg: u64) -> u64 {
+    unsafe {
+        sys::promise_batch_action_delete_key(promise_index, u64::MAX, public_key_reg);
+    };
+    public_key_reg
+}
+
+pub fn promise_batch_action_delete_key_of_signer(promise_index: u64) -> u64 {
+    promise_batch_action_delete_key(promise_index, signer_account_pk())
 }
 
 pub fn promise_create_account_from_reg(

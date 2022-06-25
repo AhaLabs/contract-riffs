@@ -1,10 +1,12 @@
 # Bootme: contract standards for publishing, deploying, and upgrading contracts
 
-Currently NEAR smart contracts written in Rust are singletons; that is one struct or enum represents the state of the contract. This state is stored in with the aptly named string `STATE`. Each time a contract method is called, this state is read potentially updated and written back to storage.
+Currently NEAR smart contracts written in Rust are singletons; there is one struct or enum that represents the state of the contract. This state is stored in storage with the aptly named key `STATE`. Each time a contract method is called, this state is read, potentially updated, and written back to storage.
 
 ## Contract Component
 
-The concept of this singleton stored in a unique place in storage is called a _contract component_. This project extends the currently `STATE` component to allow for multiple components per contract.
+The concept of this singleton stored with a unique key in storage is called a _contract component_. Thus the current `STATE` singleton used by `near_sdk_rs` is a contract component.
+
+This project allows adding multiple components per contract.
 
 A component must have the following:
 
@@ -15,9 +17,9 @@ That's it!
 
 ### Example: Owner Component
 
-This is the core component of a contract. It stores the AccountId with the unique key `OWNER`. It has two methods `set_owner` and `get_owner`.  The former can be called by any account once and then only by the owner.
+This is the core component of a contract. It stores the `AccountId` with the unique key `OWNER`. It has two methods `set_owner` and `get_owner`.  The former can be called initially by any account once and then only by the owner.
 
-Any contract that includes a owner will then be _ownable_ and restrict certain methods to the owner. For example having the following in your contract's `lib.rs` file:
+Any contract that includes an owner component will then be _ownable_ and can restrict certain methods to the owner's account. For example having the following in your contract's `lib.rs` file:
 
 ```rust
 pub use contract_utils::owner::*;
@@ -35,9 +37,9 @@ pub use contract_utils::deploy::*;
 
 ## Bootloader
 
-The bootloader contract is thus made up of these two components. It's named after an Operating System bootloader which contains minimal the code to load the rest of OS.
+The bootloader contract is made up of these two core components. It's named after an [Operating System bootloader](https://en.wikipedia.org/wiki/Bootloader) which contains minimal the code to load the rest of OS.
 
-Once deployed the owner can call `deploy` to redeploy the contract into any contract that has at least the two core components.
+Once deployed the owner account can call `deploy` to redeploy the contract into any contract that has at least the core components.
 
 To include both these core components you simple include the prelude:
 
@@ -47,7 +49,7 @@ pub use contract_utils::prelude::*;
 
 ## Registry
 
-This is a special contract that lives at a sub-account, registry, `registry.contract.near`. This registry allows you to publish versions of a contract. It four methods `patch`, `minor`, `major`, and `fetch`.  The first three are for publishing and increase the version of the contract accordingly, with the bytes of the contract attached. `fetch` optionally takes a version, otherwise returns the bytes of the latest version.
+This is a special contract that lives at a sub-account, registry, `registry.contract.near`. This registry allows you to publish versions of a contract. It four methods `patch`, `minor`, `major`, and `fetch`.  The first three are for publishing and increase the version of the contract accordingly, with the bytes of the contract attached. `fetch` optionally takes a version, e.g. `"0_0_1"`, otherwise assumes of the latest version, and returns the stored bytes.
 
 ## Launcher
 
@@ -57,10 +59,10 @@ This new contract can then be upgraded into any contract that supports the core 
 
 ## Benefits of components
 
-Currently when upgrading a contract with new state the State, component must migrate, which is a non-trivial step. However, adding a new component with new state doesn't require any migration, or if it does it can be done lazily.
+Currently when upgrading a contract with new state the State, component must migrate, which is a non-trivial step. However, adding a new component with a unique key does not require a migration.
 
 ### Lazy loading
 
-A common pattern in contracts is to use a lazy option in your main `STATE` struct to store data. This essentially acts like a component and is only read in when required. 
+A common pattern in contracts is to use a lazy option in the `STATE` struct, which essentially acts like a component and is only read in when required.
 
-Stateful components meet the requirements for a new `Lazy` trait, allowing them to be referenced by other components and loaded when needed. This allows the only the parts of storage needed for the current execution to loaded in, saving on gas.
+Stateful components meet the requirements for a new [`Lazy` trait](./src/lazy/mod.rs), allowing them to loaded using a lazy option and be referenced by other components. This allows the only the components needed for the current execution to be loaded in, saving on gas.

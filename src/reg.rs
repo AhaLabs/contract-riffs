@@ -13,6 +13,20 @@ pub enum Registers {
     StorageWriteEviction = 7,
 }
 
+impl Registers {
+    pub fn use_reg<F: FnOnce(u64)>(self, f: F) -> u64 {
+        static mut READ_REGISTERS: [bool; 8] = [false; 8];
+        let reg_int = self.into();
+        unsafe {
+            if !READ_REGISTERS[reg_int as usize] {
+                f(reg_int);
+                READ_REGISTERS[reg_int as usize] = true;
+            }
+            reg_int
+        }
+    }
+}
+
 impl From<Registers> for u64 {
     fn from(reg: Registers) -> Self {
         reg as u64
@@ -99,28 +113,10 @@ pub fn storage_has_key(key_register: u64) -> bool {
     unsafe { sys::storage_has_key(u64::MAX, key_register) != 0 }
 }
 
-fn use_reg<F: FnOnce(u64)>(reg: Registers, f: F) -> u64 {
-    static mut READ_REGISTERS: [bool; 8] = [false; 8];
-    let reg_int = reg.into();
-    unsafe {
-        if !READ_REGISTERS[reg_int as usize] {
-            f(reg_int);
-            READ_REGISTERS[reg_int as usize] = true;
-        }
-        reg_int
-    }
-}
-
 // Context
 
 pub fn input() -> u64 {
-    use_reg(Registers::Input, |reg| unsafe { sys::input(reg) })
-}
-
-pub fn signer_account_pk() -> u64 {
-    use_reg(Registers::SignerAccountPk, |reg| unsafe {
-        sys::signer_account_pk(reg)
-    })
+    Registers::Input.use_reg(|reg| unsafe { sys::input(reg) })
 }
 
 /// Returns the length of the input
@@ -128,16 +124,16 @@ pub fn input_len() -> u64 {
     env::register_len(input()).unwrap()
 }
 
+pub fn signer_account_pk() -> u64 {
+  Registers::SignerAccountPk.use_reg(|reg| unsafe { sys::signer_account_pk(reg) })
+}
+
 pub fn current_account_id() -> u64 {
-    use_reg(Registers::CurrentAccountId, |reg_id| unsafe {
-        sys::current_account_id(reg_id)
-    })
+    Registers::CurrentAccountId.use_reg(|reg_id| unsafe { sys::current_account_id(reg_id) })
 }
 
 pub fn predecessor_account_id() -> u64 {
-    use_reg(Registers::PredecessorAccountId, |reg_id| unsafe {
-        sys::predecessor_account_id(reg_id)
-    })
+    Registers::PredecessorAccountId.use_reg(|reg_id| unsafe { sys::predecessor_account_id(reg_id) })
 }
 
 // Promise

@@ -1765,8 +1765,7 @@ dependencies = [
 [[package]]
 name = "near-sdk"
 version = "4.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bda34e06e28fb9a09ac54efbdc49f0c9308780fc932aaa81c49c493fde974045"
+source = "git+https://github.com/ahalabs/near-sdk-rs?branch=feat/component_macro#83cbafb0f2432350f2b35ddef0bedcb62b284205"
 dependencies = [
  "base64 0.13.0",
  "borsh",
@@ -1786,10 +1785,10 @@ dependencies = [
 [[package]]
 name = "near-sdk-macros"
 version = "4.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72064fcc15a623a0d40a6c199ea5cbdc30a83cae4816889d46f218acf31bfba8"
+source = "git+https://github.com/ahalabs/near-sdk-rs?branch=feat/component_macro#83cbafb0f2432350f2b35ddef0bedcb62b284205"
 dependencies = [
  "Inflector",
+ "once_cell",
  "proc-macro2",
  "quote",
  "syn",
@@ -1798,8 +1797,7 @@ dependencies = [
 [[package]]
 name = "near-sys"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e307313276eaeced2ca95740b5639e1f3125b7c97f0a1151809d105f1aa8c6d3"
+source = "git+https://github.com/ahalabs/near-sdk-rs?branch=feat/component_macro#83cbafb0f2432350f2b35ddef0bedcb62b284205"
 
 [[package]]
 name = "near-units"
@@ -2714,6 +2712,14 @@ name = "status-message-advanced"
 version = "0.1.0"
 dependencies = [
  "contract-utils",
+]
+
+[[package]]
+name = "status-message-bindgen"
+version = "0.1.0"
+dependencies = [
+ "contract-utils",
+ "witgen 0.12.0",
 ]
 
 [[package]]

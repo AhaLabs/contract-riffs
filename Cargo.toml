@@ -37,5 +37,5 @@ workspaces = "0.3.1"
 proc-macro2 = false
 
 [features]
-version = []
+admins = []
 publish = []

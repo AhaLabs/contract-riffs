@@ -21,7 +21,7 @@ const MESSAGE_KEY: &str = "MESSAGE";
 #[derive(BorshSerialize, BorshDeserialize, Deserialize, Serialize, Default)]
 #[serde(crate = "near_sdk::serde")]
 #[witgen]
-#[near_bindgen(MESSAGE)]
+#[near_bindgen(component)]
 pub struct Message {
     text: String,
 }
@@ -32,7 +32,7 @@ impl IntoKey for Message {
     }
 }
 
-#[near_bindgen]
+#[near_bindgen(component)]
 impl Message {
     pub fn update_message(&mut self, message: Message) -> Message {
         self.assert_owner();

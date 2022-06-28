@@ -11,6 +11,9 @@ pub mod version;
 
 #[cfg(feature = "publish")]
 pub mod publish;
+#[cfg(feature = "admins")]
+pub mod admins;
+
 use near_sdk::{env, require};
 
 pub mod prelude {

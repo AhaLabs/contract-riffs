@@ -8,7 +8,7 @@ use contract_utils::near_sdk::AccountId;
 async fn initialize_correctly() -> anyhow::Result<()> {
     let worker = &workspaces::sandbox().await?;
     let root = worker.root_account();
-    let (bootloader, _) = init(worker, &root, false).await?;
+    let (bootloader, _) = init(worker, &root, false, false).await?;
 
     let res = bootloader.view(worker, "get_owner", vec![0]).await?;
     let owner = res.json::<String>()?;
@@ -20,7 +20,7 @@ async fn initialize_correctly() -> anyhow::Result<()> {
 async fn owner_can_transfer() -> anyhow::Result<()> {
     let worker = &workspaces::sandbox().await?;
     let root = worker.root_account();
-    let (bootloader, _) = init(worker, &root, false).await?;
+    let (bootloader, _) = init(worker, &root, false, false).await?;
 
     let alice = root
         .create_subaccount(worker, "alice")
@@ -43,7 +43,7 @@ async fn owner_can_transfer() -> anyhow::Result<()> {
 async fn non_owner_cannot_transfer() -> anyhow::Result<()> {
     let worker = &workspaces::sandbox().await?;
     let root = worker.root_account();
-    let (bootloader, _) = init(worker, &root, false).await?;
+    let (bootloader, _) = init(worker, &root, false, false).await?;
 
     let alice = root
         .create_subaccount(worker, "alice")
@@ -61,39 +61,13 @@ async fn non_owner_cannot_transfer() -> anyhow::Result<()> {
 }
 
 #[tokio::test]
-async fn can_redeploy() -> anyhow::Result<()> {
-    let worker = &workspaces::sandbox().await?;
-    let root = worker.root_account();
-    let (bootloader, registry) = init(worker, &root, true).await?;
-    let (contract, registry) = registry.unwrap();
-    println!("{}", registry.id());
+async fn can_redeploy_simple() -> anyhow::Result<()> {
+  deploy_with_simple(true).await
+}
 
-    let res = registry.view(worker, "current_version", vec![]).await?;
-
-    assert_eq!("v0_0_1".to_string(), res.json::<String>()?);
-
-    let res = root
-        .call(worker, bootloader.id(), "deploy")
-        .args(format!("v0_0_1.{}", contract.id()).as_bytes().to_vec())
-        .gas(parse_gas!("250 Tgas") as u64)
-        .transact()
-        .await?;
-    println!("{:#?}\nDeployed", res.outcome());
-    assert!(res.is_success());
-    let hello = json!({ "text": "hello world" });
-    let res = root
-        .call(worker, bootloader.id(), "update_message")
-        .args_json(hello.clone())?
-        .transact()
-        .await?;
-
-    let res = bootloader
-        .view(worker, "get_message", vec![])
-        .await?
-        .json::<Value>()?;
-    println!("{:#?}", res);
-    assert_eq!(res, hello);
-    Ok(())
+#[tokio::test]
+async fn can_redeploy_with_bindgen() -> anyhow::Result<()> {
+  deploy_with_simple(false).await
 }
 
 #[tokio::test]
@@ -134,7 +108,7 @@ async fn can_launch() -> anyhow::Result<()> {
         .call(worker, launcher.id(), "launch")
         .args_json(new_account.clone())?
         .deposit(parse_near!("10 N"))
-        .gas(parse_gas!("250 Tgas") as u64)
+        .gas(parse_gas!("300 Tgas") as u64)
         .transact()
         .await?;
     println!("Launched? {:#?}", res);
@@ -149,4 +123,41 @@ async fn can_launch() -> anyhow::Result<()> {
     println!("FINAL RES\n\n\n{:#?}", res.result);
     println!("FINAL RES\n\n\n{:#?}", String::from_utf8(res.result)?);
     Ok(())
+}
+
+
+async fn deploy_with_simple(simple: bool) -> anyhow::Result<()> {
+  let worker = &workspaces::sandbox().await?;
+  let root = worker.root_account();
+  let (bootloader, registry) = init(worker, &root, true, simple).await?;
+  let (contract, registry) = registry.unwrap();
+  println!("{}", registry.id());
+
+  let res = registry.view(worker, "current_version", vec![]).await?;
+
+  assert_eq!("v0_0_1".to_string(), res.json::<String>()?);
+
+  let res = root
+      .call(worker, bootloader.id(), "deploy")
+      .args(format!("v0_0_1.{}", contract.id()).as_bytes().to_vec())
+      .gas(parse_gas!("250 Tgas") as u64)
+      .transact()
+      .await?;
+  println!("{:#?}\nDeployed", res.outcome());
+  assert!(res.is_success());
+  let hello = json!({ "text": "hello world" });
+  let args = if simple { hello.clone() } else { json!({ "message": hello })};
+  let res = root
+      .call(worker, bootloader.id(), "update_message")
+      .args_json(args)?
+      .transact()
+      .await?;
+
+  let res = bootloader
+      .view(worker, "get_message", vec![])
+      .await?
+      .json::<Value>()?;
+  println!("{:#?}", res);
+  assert_eq!(res, hello);
+  Ok(())
 }

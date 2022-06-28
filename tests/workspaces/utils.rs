@@ -11,6 +11,7 @@ lazy_static_include::lazy_static_include_bytes! {
   pub BOOTLOADER => "./target/res/bootloader.wasm",
   pub REGISTRY => "./target/res/contract_registry.wasm",
   pub STATUS_MESSAGE => "./target/res/status_message.wasm",
+  pub STATUS_MESSAGE_BINDGEN => "./target/res/status_message_bindgen.wasm",
   pub CONTRACT_LAUNCHER => "./target/res/contract_launcher.wasm",
   pub NEAR_WASM => "./target/res/near.wasm"
 
@@ -29,6 +30,7 @@ pub async fn init(
     worker: &Worker<impl DevNetwork>,
     root: &Account,
     init_registry: bool,
+    simple: bool,
 ) -> Result<(Contract, Option<(Account, Contract)>)> {
     let bootloader = worker.dev_deploy(&BOOTLOADER).await?;
     let owner_bytes = root.id().as_bytes().to_vec();
@@ -77,9 +79,13 @@ pub async fn init(
 
         let res = root
             .call(worker, registry.id(), "patch")
-            .args(STATUS_MESSAGE.to_vec())
+            .args(if simple {
+                STATUS_MESSAGE.to_vec()
+            } else {
+                STATUS_MESSAGE_BINDGEN.to_vec()
+            })
             .gas(300_000_000_000_000)
-            .deposit(parse_near!("1N"))
+            .deposit(parse_near!("10 N"))
             .transact()
             .await?;
         println!("{:#?}", res);
@@ -171,10 +177,16 @@ pub async fn init_with_launcher(
         }))?)
         .transact()
         .await?;
-    
+
     println!("Updated {:#?}", res);
     assert!(res.is_success(), "Failed to set registry owner");
-    println!("{}", worker.view(launcher.id(), "accounts", vec![]).await?.json::<Value>()?);
+    println!(
+        "{}",
+        worker
+            .view(launcher.id(), "accounts", vec![])
+            .await?
+            .json::<Value>()?
+    );
     // root.batch(&worker, &format!("registry.{}", root.id()).parse()?)
     //     .create_account()
     //     .transfer(parse_near!("10 N"))
@@ -190,7 +202,7 @@ pub async fn init_with_launcher(
         .call(worker, registry.id(), "patch")
         .args(BOOTLOADER.to_vec())
         .gas(300_000_000_000_000)
-        .deposit(parse_near!("1N"))
+        .deposit(parse_near!("10N"))
         .transact()
         .await?;
     println!("{:#?}", res);

@@ -4,6 +4,8 @@ pub mod lazy_option;
 use crate::IntoKey;
 pub use lazy_option::*;
 
+/// Components meet the requirements to implement this trait.
+/// Allows getting a lazy option of the component state and setting it back to storage.
 pub trait Lazy: Sized + BorshDeserialize + BorshSerialize + IntoKey {
     fn get_lazy() -> LazyOption<Self>;
 
@@ -26,6 +28,9 @@ pub trait Lazy: Sized + BorshDeserialize + BorshSerialize + IntoKey {
     }
 }
 
+/// Here we implement the trait for all components.
+/// 
+/// Adding this to the scope adds the methods to component type
 impl<Item> Lazy for Item
 where
     Item: IntoKey + BorshDeserialize + BorshSerialize,

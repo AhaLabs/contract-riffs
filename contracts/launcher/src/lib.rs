@@ -4,15 +4,12 @@ use contract_utils::{
         borsh::{self, BorshDeserialize, BorshSerialize},
         env, ext_contract, near_bindgen,
         serde::Serialize,
-        AccountId, Gas, Promise, PublicKey,
+        AccountId, Promise, PublicKey,
     },
-    near_units::parse_gas,
-    reg, witgen,
+    witgen,
 };
 
 pub use contract_utils::prelude::*;
-
-const GAS: Gas = Gas(parse_gas!("15 TGas") as u64);
 
 #[ext_contract(near)]
 trait NearAccount {
@@ -25,8 +22,8 @@ trait NearAccount {
     );
 }
 
-#[ext_contract(boot)]
-trait Bootloader {
+#[ext_contract(registry)]
+trait Registry {
     fn fetch();
 }
 
@@ -72,6 +69,8 @@ fn registry() -> AccountId {
 
 #[near_bindgen]
 impl Contract {
+
+    /// Proivde a new default root_account and/or registry
     pub fn update(&mut self, root_account: Option<AccountId>, registry: Option<AccountId>) {
         self.assert_owner();
         if let Some(root_account) = root_account {
@@ -83,6 +82,7 @@ impl Contract {
     }
 
     /// Create account and deploy a contract from a registry, bootloader contract by default
+    /// As a sub account of the `root_account`, which by default is the network's top level account
     #[payable]
     pub fn launch(
         &mut self,
@@ -90,7 +90,7 @@ impl Contract {
         registry: Option<AccountId>,
         root_account: Option<AccountId>,
     ) -> Promise {
-        boot::ext(registry.unwrap_or_else(|| self.registry.clone()))
+        registry::ext(registry.unwrap_or_else(|| self.registry.clone()))
             .fetch()
             .then(
                 Self::ext(env::current_account_id())
@@ -106,7 +106,6 @@ impl Contract {
     #[private]
     pub fn _fetch(&self, account_id: AccountId, owner: AccountId, root_account: AccountId) {
         let amount = env::attached_deposit();
-        env::log_str(&amount.to_string());
         let bytes = match env::promise_result(0) {
             near_sdk::PromiseResult::Successful(data) => data,
             _ => env::panic_str("failed to fetch bytes"),

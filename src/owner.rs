@@ -55,6 +55,10 @@ pub trait Ownable {
     fn assert_owner(&self) {
         Owner::assert()
     }
+
+    fn predecessor_is_owner(&self) -> bool {
+      Owner::is_predecessor()
+    }
 }
 
 impl<Item> Ownable for Item {}

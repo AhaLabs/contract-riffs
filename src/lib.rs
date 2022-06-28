@@ -6,11 +6,11 @@ pub mod account;
 pub mod deploy;
 pub mod lazy;
 pub mod owner;
-pub mod publish;
 pub mod reg;
-#[cfg(feature = "version")]
 pub mod version;
 
+#[cfg(feature = "publish")]
+pub mod publish;
 use near_sdk::{env, require};
 
 pub mod prelude {

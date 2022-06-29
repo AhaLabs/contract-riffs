@@ -8,7 +8,7 @@ version = "0.1.0"
 crate-type = ["cdylib"]
 
 [dependencies]
-contract-utils = { path = "../.." }
+contract-utils = {path = "../..", features = ["wee_alloc"]}
 
 [features]
 testnet = []

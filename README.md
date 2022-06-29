@@ -1,6 +1,6 @@
 # Bootme: contract standards for publishing, deploying, and upgrading contracts
 
-Currently NEAR smart contracts written in Rust are singletons; there is one struct or enum that represents the state of the contract. This state is stored in storage with the aptly named key `STATE`. Each time a contract method is called, this state is read, potentially updated, and written back to storage.
+Currently NEAR smart contracts written in Rust are singletons; there is one struct or enum that represents the state of the contract. This state is stored in contract storage with the aptly named key `STATE`. Each time a contract method is called, this state is read, potentially updated, and written back to storage.
 
 ## Contract Component
 
@@ -66,3 +66,13 @@ Currently when upgrading a contract with new state the State, component must mig
 A common pattern in contracts is to use a lazy option in the `STATE` struct, which essentially acts like a component and is only read in when required.
 
 Stateful components meet the requirements for a new [`Lazy` trait](./src/lazy/mod.rs), allowing them to loaded using a lazy option and be referenced by other components. This allows the only the components needed for the current execution to be loaded in, saving on gas.
+
+
+## Using library
+
+This library depends on `near-sdk-rs` and re-exports it if you want to use the same version. However, if you use this version you will need to add the `wee_alloc` feature:
+
+```
+contract-utils = { version = "0.0.1", features = ["wee_alloc"]}
+
+```

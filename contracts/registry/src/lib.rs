@@ -1,4 +1,4 @@
-use contract_utils::{
+use near_components::{
     near_sdk::{
         self,
         borsh::{self, BorshDeserialize, BorshSerialize},
@@ -9,7 +9,7 @@ use contract_utils::{
     version::Version,
 };
 
-use contract_utils::prelude::*;
+use near_components::prelude::*;
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]

@@ -1,4 +1,4 @@
-use contract_utils::{
+use near_components::{
     near_sdk::{
         self,
         borsh::{self, BorshDeserialize, BorshSerialize},
@@ -9,7 +9,7 @@ use contract_utils::{
     witgen,
 };
 
-pub use contract_utils::prelude::*;
+pub use near_components::prelude::*;
 
 #[ext_contract(near)]
 trait NearAccount {

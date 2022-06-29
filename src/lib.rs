@@ -1,3 +1,8 @@
+//! # Near Components
+//! 
+//! Composible components for NEAR smart contracts
+
+
 pub use near_sdk;
 pub use near_units;
 pub use witgen::witgen;

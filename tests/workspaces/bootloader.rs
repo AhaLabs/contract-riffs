@@ -2,7 +2,7 @@ use near_units::{parse_gas, parse_near};
 use serde_json::{json, Value};
 
 use crate::utils::{init, init_with_launcher};
-use contract_utils::near_sdk::AccountId;
+use near_components::near_sdk::AccountId;
 
 #[tokio::test]
 async fn initialize_correctly() -> anyhow::Result<()> {

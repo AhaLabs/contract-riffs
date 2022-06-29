@@ -332,7 +332,7 @@ dependencies = [
 name = "bootloader"
 version = "0.1.0"
 dependencies = [
- "contract-utils",
+ "near-components",
  "witgen 0.11.0",
 ]
 
@@ -545,31 +545,14 @@ checksum = "245097e9a4535ee1e3e3931fcfcd55a796a44c643e8596ff6566d68f09b87bbc"
 name = "contract-launcher"
 version = "0.1.0"
 dependencies = [
- "contract-utils",
+ "near-components",
 ]
 
 [[package]]
 name = "contract-registry"
 version = "0.1.0"
 dependencies = [
- "contract-utils",
-]
-
-[[package]]
-name = "contract-utils"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "base64 0.13.0",
- "lazy-static-include",
- "near-primitives 0.12.0",
- "near-sdk",
- "near-units",
- "proc-macro2",
- "serde_json",
- "tokio",
- "witgen 0.14.0",
- "workspaces",
+ "near-components",
 ]
 
 [[package]]
@@ -1408,7 +1391,7 @@ dependencies = [
 name = "near"
 version = "0.1.0"
 dependencies = [
- "contract-utils",
+ "near-components",
 ]
 
 [[package]]
@@ -1490,6 +1473,23 @@ dependencies = [
  "near-primitives 0.12.0",
  "strum 0.20.0",
  "thiserror",
+]
+
+[[package]]
+name = "near-components"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "base64 0.13.0",
+ "lazy-static-include",
+ "near-primitives 0.12.0",
+ "near-sdk",
+ "near-units",
+ "proc-macro2",
+ "serde_json",
+ "tokio",
+ "witgen 0.14.0",
+ "workspaces",
 ]
 
 [[package]]
@@ -2703,7 +2703,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 name = "status-message"
 version = "0.1.0"
 dependencies = [
- "contract-utils",
+ "near-components",
  "witgen 0.12.0",
 ]
 
@@ -2711,14 +2711,14 @@ dependencies = [
 name = "status-message-advanced"
 version = "0.1.0"
 dependencies = [
- "contract-utils",
+ "near-components",
 ]
 
 [[package]]
 name = "status-message-bindgen"
 version = "0.1.0"
 dependencies = [
- "contract-utils",
+ "near-components",
  "witgen 0.12.0",
 ]
 

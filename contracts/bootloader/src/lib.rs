@@ -4,15 +4,15 @@
 //!
 //! The following brings all needed types into scope and exports the necessary contract methods
 //! ```
-//! pub use contract_utils::prelude::*;
+//! pub use near_components::prelude::*;
 //! ```
 //!
 //! This is equivalent to:
 //! ```
 //!  // Is ownable, e.i. stores owner in storage at "OWNER"
-//! pub use contract_utils::owner::*;
+//! pub use near_components::owner::*;
 //!  // Uses ownable to check owner before deploying contract
-//! pub use contract_utils::deploy::*;
+//! pub use near_components::deploy::*;
 //!
 //! // If a type implements IntoKey and BorshSerialize + BorshDeserialize
 //! // then it can become a lazy component. That is have state separate from the contract's main state.
@@ -20,4 +20,4 @@
 //! pub use super::IntoKey;
 //! ```
 
-pub use contract_utils::prelude::*;
+pub use near_components::prelude::*;

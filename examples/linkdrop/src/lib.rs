@@ -1,4 +1,4 @@
-use contract_utils::{
+use near_components::{
     near_sdk::{
         self,
         borsh::{self, BorshDeserialize, BorshSerialize},

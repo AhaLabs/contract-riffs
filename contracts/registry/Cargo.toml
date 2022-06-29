@@ -8,4 +8,4 @@ version = "0.1.0"
 crate-type = ["cdylib"]
 
 [dependencies]
-contract-utils = { path = "../..", features = ["publish", "wee_alloc"]}
+near-components = { path = "../..", features = ["publish", "wee_alloc"]}

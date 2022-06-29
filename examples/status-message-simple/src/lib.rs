@@ -3,14 +3,14 @@
 //! This is an example contract using owneable and deployable components
 //!
 
-use contract_utils::near_sdk::{
+use near_components::near_sdk::{
     self,
     borsh::{self, BorshDeserialize, BorshSerialize},
     serde::{Deserialize, Serialize},
 };
 
 /// Uses ownable to check owner before deploying contract
-pub use contract_utils::prelude::*;
+pub use near_components::prelude::*;
 
 const MESSAGE_KEY: &str = "MESSAGE";
 

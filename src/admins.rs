@@ -37,7 +37,7 @@ pub trait Admin: Ownable {
 
     fn assert_owner_or_admin(&self) {
         require!(
-            self.predecessor_is_owner() && self.predecessor_is_admin(),
+          self.predecessor_is_admin() || self.predecessor_is_owner(),
             "Not allowed: must be owner or admin"
         );
     }

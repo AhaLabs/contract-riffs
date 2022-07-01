@@ -1,4 +1,5 @@
 use near_components::{
+    account_id_from_input,
     lazy::Lazy,
     near_sdk::{
         self,
@@ -6,7 +7,6 @@ use near_components::{
         env, near_bindgen, require, AccountId,
     },
     IntoKey,
-    account_id_from_input
 };
 
 pub use near_components_core::*;
@@ -46,7 +46,6 @@ pub trait Admin: Ownable {
 }
 
 impl<Item> Admin for Item {}
-
 
 #[near_bindgen(component)]
 impl Admins {

@@ -5,8 +5,7 @@ use near_components::{
         collections::UnorderedMap,
         env, ext_contract,
         json_types::U128,
-        near_bindgen, require, AccountId, Balance, Gas, Promise, PromiseResult,
-        PublicKey,
+        near_bindgen, require, AccountId, Balance, Gas, Promise, PromiseResult, PublicKey,
     },
     near_units::parse_near,
 };

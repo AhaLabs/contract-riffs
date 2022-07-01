@@ -11,7 +11,6 @@ use near_components::{
 
 pub use near_components_core::*;
 
-
 #[ext_contract(near)]
 trait NearAccount {
     fn create_account_and_deploy(
@@ -70,7 +69,6 @@ fn registry() -> AccountId {
 
 #[near_bindgen]
 impl Contract {
-
     /// Proivde a new default root_account and/or registry
     pub fn update(&mut self, root_account: Option<AccountId>, registry: Option<AccountId>) {
         // self.assert_owner();

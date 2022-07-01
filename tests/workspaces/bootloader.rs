@@ -62,12 +62,12 @@ async fn non_owner_cannot_transfer() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn can_redeploy_simple() -> anyhow::Result<()> {
-  deploy_with_simple(true).await
+    deploy_with_simple(true).await
 }
 
 #[tokio::test]
 async fn can_redeploy_with_bindgen() -> anyhow::Result<()> {
-  deploy_with_simple(false).await
+    deploy_with_simple(false).await
 }
 
 #[tokio::test]
@@ -125,39 +125,42 @@ async fn can_launch() -> anyhow::Result<()> {
     Ok(())
 }
 
-
 async fn deploy_with_simple(simple: bool) -> anyhow::Result<()> {
-  let worker = &workspaces::sandbox().await?;
-  let root = worker.root_account();
-  let (bootloader, registry) = init(worker, &root, true, simple).await?;
-  let (contract, registry) = registry.unwrap();
-  println!("{}", registry.id());
+    let worker = &workspaces::sandbox().await?;
+    let root = worker.root_account();
+    let (bootloader, registry) = init(worker, &root, true, simple).await?;
+    let (contract, registry) = registry.unwrap();
+    println!("{}", registry.id());
 
-  let res = registry.view(worker, "current_version", vec![]).await?;
+    let res = registry.view(worker, "current_version", vec![]).await?;
 
-  assert_eq!("v0_0_1".to_string(), res.json::<String>()?);
+    assert_eq!("v0_0_1".to_string(), res.json::<String>()?);
 
-  let res = root
-      .call(worker, bootloader.id(), "deploy")
-      .args(format!("v0_0_1.{}", contract.id()).as_bytes().to_vec())
-      .gas(parse_gas!("250 Tgas") as u64)
-      .transact()
-      .await?;
-  println!("{:#?}\nDeployed", res.outcome());
-  assert!(res.is_success());
-  let hello = json!({ "text": "hello world" });
-  let args = if simple { hello.clone() } else { json!({ "message": hello })};
-  let res = root
-      .call(worker, bootloader.id(), "update_message")
-      .args_json(args)?
-      .transact()
-      .await?;
+    let res = root
+        .call(worker, bootloader.id(), "deploy")
+        .args(format!("v0_0_1.{}", contract.id()).as_bytes().to_vec())
+        .gas(parse_gas!("250 Tgas") as u64)
+        .transact()
+        .await?;
+    println!("{:#?}\nDeployed", res.outcome());
+    assert!(res.is_success());
+    let hello = json!({ "text": "hello world" });
+    let args = if simple {
+        hello.clone()
+    } else {
+        json!({ "message": hello })
+    };
+    let res = root
+        .call(worker, bootloader.id(), "update_message")
+        .args_json(args)?
+        .transact()
+        .await?;
 
-  let res = bootloader
-      .view(worker, "get_message", vec![])
-      .await?
-      .json::<Value>()?;
-  println!("{:#?}", res);
-  assert_eq!(res, hello);
-  Ok(())
+    let res = bootloader
+        .view(worker, "get_message", vec![])
+        .await?
+        .json::<Value>()?;
+    println!("{:#?}", res);
+    assert_eq!(res, hello);
+    Ok(())
 }

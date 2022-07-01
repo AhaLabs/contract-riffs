@@ -29,7 +29,7 @@ pub trait Lazy: Sized + BorshDeserialize + BorshSerialize + IntoKey {
 }
 
 /// Here we implement the trait for all components.
-/// 
+///
 /// Adding this to the scope adds the methods to component type
 impl<Item> Lazy for Item
 where

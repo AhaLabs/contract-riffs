@@ -16,7 +16,6 @@ pub struct Version {
     major: u16,
 }
 
-
 impl Serialize for Version {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

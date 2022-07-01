@@ -2,7 +2,6 @@ use near_sdk::{env, sys, Balance, Gas};
 
 use crate::account::{self, FixedAccountId};
 
-
 pub fn promise_then(
     promise_idx: u64,
     account_id: FixedAccountId,

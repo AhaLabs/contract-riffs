@@ -17,7 +17,6 @@ use near_components::{
 pub use near_components::prelude::*;
 pub use near_components_core::*;
 
-
 const MESSAGE_KEY: &str = "MESSAGE";
 
 #[derive(BorshSerialize, BorshDeserialize, Deserialize, Serialize, Default)]

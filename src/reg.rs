@@ -125,7 +125,7 @@ pub fn input_len() -> u64 {
 }
 
 pub fn signer_account_pk() -> u64 {
-  Registers::SignerAccountPk.use_reg(|reg| unsafe { sys::signer_account_pk(reg) })
+    Registers::SignerAccountPk.use_reg(|reg| unsafe { sys::signer_account_pk(reg) })
 }
 
 pub fn current_account_id() -> u64 {

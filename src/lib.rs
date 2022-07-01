@@ -1,7 +1,6 @@
 //! # Near Components
-//! 
+//!
 //! Composible components for NEAR smart contracts
-
 
 pub use near_sdk;
 pub use near_units;
@@ -9,10 +8,9 @@ pub use witgen::witgen;
 
 pub mod account;
 pub mod lazy;
-pub mod reg;
 pub mod promise;
+pub mod reg;
 pub mod version;
-
 
 use near_sdk::{env, require, AccountId};
 
@@ -53,18 +51,18 @@ pub trait IntoKey {
 
 /// Can decode `{"account_id": account_id}`, `"account_id"`, or `account_id`
 pub fn account_id_from_input() -> AccountId {
-  use microjson::JSONValue;
-  let input: String = unsafe { String::from_utf8_unchecked(env::input().unwrap()) };
-  input.parse().unwrap_or_else(|_| {
-      let object = JSONValue::parse(&input).unwrap();
-      use microjson::JSONValueType;
-      let account_id = match object.value_type {
-          JSONValueType::String => object.read_string().map(Into::into),
-          JSONValueType::Object => object
-              .get_key_value("account_id")
-              .and_then(|val| val.read_string().map(|x| x.to_string())),
-          _ => env::panic_str("cannot parse account_id"),
-      };
-      account_id.unwrap().parse().unwrap()
-  })
+    use microjson::JSONValue;
+    let input: String = unsafe { String::from_utf8_unchecked(env::input().unwrap()) };
+    input.parse().unwrap_or_else(|_| {
+        let object = JSONValue::parse(&input).unwrap();
+        use microjson::JSONValueType;
+        let account_id = match object.value_type {
+            JSONValueType::String => object.read_string().map(Into::into),
+            JSONValueType::Object => object
+                .get_key_value("account_id")
+                .and_then(|val| val.read_string().map(|x| x.to_string())),
+            _ => env::panic_str("cannot parse account_id"),
+        };
+        account_id.unwrap().parse().unwrap()
+    })
 }

@@ -1,4 +1,3 @@
-
 use near_components::{
     near_sdk::{
         self,

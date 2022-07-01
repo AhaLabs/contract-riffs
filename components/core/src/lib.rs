@@ -5,14 +5,9 @@
 
 use near_components::{
     account::{self, FixedAccountId},
-    near_sdk::{
-        self,
-        borsh::{self, BorshDeserialize, BorshSerialize},
-        env, near_bindgen, require,
-        serde::{Deserialize, Serialize},
-        serde_json, AccountId,
-    },
-    reg, witgen, account_id_from_input,
+    account_id_from_input,
+    near_sdk::{env, require, AccountId},
+    reg,
 };
 
 pub mod deploy;

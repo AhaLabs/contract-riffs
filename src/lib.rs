@@ -20,7 +20,7 @@ pub mod version;
 // #[cfg(feature = "admins")]
 // pub mod admins;
 
-use near_sdk::{env, require};
+use near_sdk::{env, require, AccountId};
 
 pub mod prelude {
     // pub use super::deploy::*;
@@ -57,4 +57,22 @@ pub fn refund_storage_cost<F: FnOnce()>(f: F) {
 
 pub trait IntoKey {
     fn into_storage_key() -> Vec<u8>;
+}
+
+/// Can decode `{"account_id": account_id}`, `"account_id"`, or `account_id`
+pub fn account_id_from_input() -> AccountId {
+  use microjson::JSONValue;
+  let input: String = unsafe { String::from_utf8_unchecked(env::input().unwrap()) };
+  input.parse().unwrap_or_else(|_| {
+      let object = JSONValue::parse(&input).unwrap();
+      use microjson::JSONValueType;
+      let account_id = match object.value_type {
+          JSONValueType::String => object.read_string().map(Into::into),
+          JSONValueType::Object => object
+              .get_key_value("account_id")
+              .and_then(|val| val.read_string().map(|x| x.to_string())),
+          _ => env::panic_str("cannot parse account_id"),
+      };
+      account_id.unwrap().parse().unwrap()
+  })
 }

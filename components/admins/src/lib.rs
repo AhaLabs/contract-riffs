@@ -6,9 +6,10 @@ use near_components::{
         env, near_bindgen, require, AccountId,
     },
     IntoKey,
+    account_id_from_input
 };
 
-use near_components_core::*;
+pub use near_components_core::*;
 
 const ADMINS_KEY: &str = "ADMINS";
 
@@ -49,9 +50,9 @@ impl<Item> Admin for Item {}
 
 #[near_bindgen(component)]
 impl Admins {
-    pub fn add_admin(&mut self, account_id: AccountId) {
+    pub fn add_admin(&mut self) {
         self.assert_owner_or_admin();
-        self.admins.push(account_id);
+        self.admins.push(account_id_from_input());
     }
 
     pub fn get_admins(&self) -> Vec<AccountId> {

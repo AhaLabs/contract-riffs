@@ -514,6 +514,7 @@ name = "contract-launcher"
 version = "0.1.0"
 dependencies = [
  "near-components",
+ "near-components-core",
 ]
 
 [[package]]
@@ -521,6 +522,7 @@ name = "contract-registry"
 version = "0.1.0"
 dependencies = [
  "near-components",
+ "near-components-core",
 ]
 
 [[package]]
@@ -1456,6 +1458,7 @@ dependencies = [
  "anyhow",
  "base64 0.13.0",
  "lazy-static-include",
+ "microjson",
  "near-primitives 0.12.0",
  "near-sdk",
  "near-units",
@@ -1467,11 +1470,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "near-components-admins"
+version = "0.1.0"
+dependencies = [
+ "microjson",
+ "near-components",
+ "near-components-core",
+]
+
+[[package]]
 name = "near-components-core"
 version = "0.1.0"
 dependencies = [
  "microjson",
  "near-components",
+]
+
+[[package]]
+name = "near-components-publish"
+version = "0.1.0"
+dependencies = [
+ "microjson",
+ "near-components",
+ "near-components-core",
 ]
 
 [[package]]
@@ -2699,6 +2720,7 @@ name = "status-message-bindgen"
 version = "0.1.0"
 dependencies = [
  "near-components",
+ "near-components-core",
  "witgen 0.12.0",
 ]
 

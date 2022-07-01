@@ -30,7 +30,7 @@ impl IntoKey for Message {
 #[no_mangle]
 pub fn update_message() {
     // any type can assert owner (weird Rust ;-))
-    // "a".assert_owner();
+    "a".assert_owner();
 
     // Deserialize input into Message
     let msg: Message = near_sdk::serde_json::from_slice(

@@ -15,6 +15,8 @@ use near_components::{
 
 /// Uses ownable to check owner before deploying contract
 pub use near_components::prelude::*;
+pub use near_components_core::*;
+
 
 const MESSAGE_KEY: &str = "MESSAGE";
 
@@ -35,7 +37,7 @@ impl IntoKey for Message {
 #[near_bindgen(component)]
 impl Message {
     pub fn update_message(&mut self, message: Message) -> Message {
-        // self.assert_owner();
+        self.assert_owner();
         // set new message and get old message
         let mut message = message;
         std::mem::swap(self, &mut message);

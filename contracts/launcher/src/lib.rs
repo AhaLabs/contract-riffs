@@ -9,7 +9,8 @@ use near_components::{
     witgen,
 };
 
-pub use near_components::prelude::*;
+pub use near_components_core::*;
+
 
 #[ext_contract(near)]
 trait NearAccount {

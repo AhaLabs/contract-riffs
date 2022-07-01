@@ -9,7 +9,7 @@ use near_components::{
     version::Version,
 };
 
-use near_components::prelude::*;
+pub use near_components_core::*;
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]

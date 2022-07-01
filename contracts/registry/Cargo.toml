@@ -8,4 +8,5 @@ version = "0.1.0"
 crate-type = ["cdylib"]
 
 [dependencies]
-near-components = { path = "../..", features = ["publish", "wee_alloc"]}
+near-components = { path = "../..", features = ["wee_alloc"]}
+near-components-core = { path = "../../components/core"}

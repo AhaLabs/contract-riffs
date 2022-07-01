@@ -8,10 +8,10 @@ version = "0.1.0"
 members = [
   "contracts/*",
   "examples/*",
+  "components/*",
 ]
 
 exclude = [
-  "components/*",
 ]
 
 [profile.release]
@@ -23,6 +23,7 @@ overflow-checks = true
 panic = "abort"
 
 [dependencies]
+microjson = "0.1.1"
 near-sdk = {git = "https://github.com/ahalabs/near-sdk-rs", branch = "feat/component_macro", features = ["unstable"], default-features = false}
 near-units = "0.2.0"
 witgen = "0.14.0"

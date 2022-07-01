@@ -101,13 +101,13 @@ impl Owner {
     }
 }
 
-#[no_mangle]
-pub fn set_owner() {
-    Owner::set_from_input();
-}
+// #[no_mangle]
+// pub fn set_owner() {
+//     Owner::set_from_input();
+// }
 
-#[no_mangle]
-pub fn get_owner() {
-    let s = &format!("\"{}\"", Owner::get_str());
-    env::value_return(s.as_bytes())
-}
+// #[no_mangle]
+// pub fn get_owner() {
+//     let s = &format!("\"{}\"", Owner::get_str());
+//     env::value_return(s.as_bytes())
+// }

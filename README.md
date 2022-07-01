@@ -72,7 +72,7 @@ Stateful components meet the requirements for a new [`Lazy` trait](./src/lazy/mo
 
 This library depends on `near-sdk-rs` and re-exports it if you want to use the same version. However, if you use this version you will need to add the `wee_alloc` feature:
 
-```
+```toml
 contract-utils = { version = "0.0.1", features = ["wee_alloc"]}
 
 ```

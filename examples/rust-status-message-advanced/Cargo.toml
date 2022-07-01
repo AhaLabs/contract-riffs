@@ -10,4 +10,5 @@ crate-type = ["cdylib"]
 [dependencies]
 # near-units = "0.2.0"
 near-components = {path = "../..", features = ["wee_alloc"]}
+near-components-core = {path = "../../components/core"}
 

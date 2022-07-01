@@ -72,7 +72,7 @@ impl Contract {
 
     /// Proivde a new default root_account and/or registry
     pub fn update(&mut self, root_account: Option<AccountId>, registry: Option<AccountId>) {
-        self.assert_owner();
+        // self.assert_owner();
         if let Some(root_account) = root_account {
             self.root_account = root_account;
         }

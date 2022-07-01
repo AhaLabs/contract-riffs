@@ -8,23 +8,24 @@ pub use near_units;
 pub use witgen::witgen;
 
 pub mod account;
-pub mod deploy;
+// pub mod deploy;
 pub mod lazy;
-pub mod owner;
+// pub mod owner;
 pub mod reg;
+pub mod promise;
 pub mod version;
 
-#[cfg(feature = "publish")]
-pub mod publish;
-#[cfg(feature = "admins")]
-pub mod admins;
+// #[cfg(feature = "publish")]
+// pub mod publish;
+// #[cfg(feature = "admins")]
+// pub mod admins;
 
 use near_sdk::{env, require};
 
 pub mod prelude {
-    pub use super::deploy::*;
+    // pub use super::deploy::*;
     pub use super::lazy::Lazy;
-    pub use super::owner::*;
+    // pub use super::owner::*;
     pub use super::IntoKey;
 }
 

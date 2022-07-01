@@ -10,6 +10,10 @@ members = [
   "examples/*",
 ]
 
+exclude = [
+  "components/*",
+]
+
 [profile.release]
 codegen-units = 1
 debug = false
@@ -37,6 +41,7 @@ workspaces = "0.3.1"
 proc-macro2 = false
 
 [features]
+default = []
 admins = []
 wee_alloc = ["near-sdk/default"]
 publish = []

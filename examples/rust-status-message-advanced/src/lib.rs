@@ -1,3 +1,4 @@
+
 use near_components::{
     near_sdk::{
         self,
@@ -9,6 +10,7 @@ use near_components::{
 };
 
 pub use near_components::prelude::*;
+pub use near_components_core::*;
 
 mod views;
 

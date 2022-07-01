@@ -20,4 +20,4 @@
 //! pub use super::IntoKey;
 //! ```
 
-pub use near_components::prelude::*;
+pub use near_components_core::*;

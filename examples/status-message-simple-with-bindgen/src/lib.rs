@@ -35,7 +35,7 @@ impl IntoKey for Message {
 #[near_bindgen(component)]
 impl Message {
     pub fn update_message(&mut self, message: Message) -> Message {
-        self.assert_owner();
+        // self.assert_owner();
         // set new message and get old message
         let mut message = message;
         std::mem::swap(self, &mut message);

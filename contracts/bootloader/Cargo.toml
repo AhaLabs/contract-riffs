@@ -8,10 +8,8 @@ crate-type = ["cdylib"]
 
 [dependencies]
 # near-units = "0.2.0"
-near-components = {path = "../..", features = ["wee_alloc"]}
-
-[dev-dependencies]
-witgen = "0.11.0"
+near-components-core = {path = "../../components/core"}
 
 [features]
+default = ["near-components-core/wee_alloc"]
 testnet = []

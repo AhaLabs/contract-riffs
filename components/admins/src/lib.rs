@@ -1,5 +1,4 @@
 use near_components::{
-    account_id_from_input,
     lazy::Lazy,
     near_sdk::{
         self,
@@ -25,16 +24,9 @@ impl IntoKey for Admins {
     }
 }
 
-pub trait Admin: Ownable {
+pub trait AdminAssertable {
     fn assert_admin(&self) {
         require!(self.predecessor_is_admin(), "Not allowed: must be admin");
-    }
-
-    fn assert_owner_or_admin(&self) {
-        require!(
-            self.predecessor_is_admin() || self.predecessor_is_owner(),
-            "Not allowed: must be owner or admin"
-        );
     }
 
     fn predecessor_is_admin(&self) -> bool {
@@ -45,20 +37,30 @@ pub trait Admin: Ownable {
     }
 }
 
-impl<Item> Admin for Item {}
+pub trait AdminAndOwnerAssertable {
+    fn assert_owner_or_admin(&self) {
+        require!(
+            self.predecessor_is_admin() || self.predecessor_is_owner(),
+            "Not allowed: must be owner or admin"
+        );
+    }
+}
 
-#[near_bindgen(component)]
+pub trait Administratable {
+    pub fn is_admin(&self, account_id: AccountId) -> bool {
+        self.admins.contains(&account_id)
+    }
+}
+
+impl Administratable for Admins {}
+
 impl Admins {
-    pub fn add_admin(&mut self) {
+    pub fn add_admin(&mut self, account_id: AccountId) {
         self.assert_owner_or_admin();
-        self.admins.push(account_id_from_input());
+        self.admins.push(account_id);
     }
 
     pub fn get_admins(&self) -> Vec<AccountId> {
         self.admins.clone()
-    }
-
-    fn is_admin(&self, account_id: AccountId) -> bool {
-        self.admins.contains(&account_id)
     }
 }

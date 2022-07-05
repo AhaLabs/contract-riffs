@@ -1466,7 +1466,7 @@ dependencies = [
  "proc-macro2",
  "serde_json",
  "tokio",
- "witgen 0.14.0",
+ "witgen",
  "workspaces",
 ]
 
@@ -2721,8 +2721,7 @@ name = "status-message-bindgen"
 version = "0.1.0"
 dependencies = [
  "near-components",
- "near-components-core",
- "witgen 0.12.0",
+ "near-components-admins",
 ]
 
 [[package]]
@@ -3305,33 +3304,11 @@ dependencies = [
 
 [[package]]
 name = "witgen"
-version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5745a2c1d77395666f67bfd7d65c3dffcee062f2ba6ac7798669a0ac24f00001"
-dependencies = [
- "witgen_macro 0.12.0",
-]
-
-[[package]]
-name = "witgen"
 version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "81a2a6817e5b36c9c054d9d3642259f1c6b6fe08a2d98ce14d127b1e84ee8497"
 dependencies = [
- "witgen_macro 0.14.0",
-]
-
-[[package]]
-name = "witgen_macro"
-version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98ecbb5e35988f50149a271aee44a441f2e31a947700ccf2780caf65d7147e40"
-dependencies = [
- "anyhow",
- "once_cell",
- "proc-macro2",
- "syn",
- "witgen_macro_helper 0.12.0",
+ "witgen_macro",
 ]
 
 [[package]]
@@ -3344,21 +3321,7 @@ dependencies = [
  "once_cell",
  "proc-macro2",
  "syn",
- "witgen_macro_helper 0.14.0",
-]
-
-[[package]]
-name = "witgen_macro_helper"
-version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d6166704cf05b39b810ebe4a7611eb5723ca287c9ada91bca7a155fd552d969"
-dependencies = [
- "anyhow",
- "heck 0.4.0",
- "proc-macro2",
- "quote",
- "syn",
- "syn-file-expand",
+ "witgen_macro_helper",
 ]
 
 [[package]]

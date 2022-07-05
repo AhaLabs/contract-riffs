@@ -15,7 +15,8 @@ use near_components::{
 
 /// Uses ownable to check owner before deploying contract
 pub use near_components::prelude::*;
-pub use near_components_core::*;
+pub use near_components_admins::{Administratable, Ownable};
+// pub use near_components::{Administratable, Ownable};
 
 const MESSAGE_KEY: &str = "MESSAGE";
 
@@ -27,6 +28,17 @@ pub struct Message {
     text: String,
 }
 
+// TODO: Make derivable
+// impl Administratable for Message {
+//     fn predecessor_is_admin(&self) -> bool {
+//         true
+//     }
+//
+//     pub fn is_admin(&self, account_id: AccountId) -> bool {
+//         true
+//     }
+// }
+
 impl IntoKey for Message {
     fn into_storage_key() -> Vec<u8> {
         MESSAGE_KEY.as_bytes().to_vec()
@@ -35,8 +47,12 @@ impl IntoKey for Message {
 
 #[near_bindgen(component)]
 impl Message {
+    fn predecessor_is_admin(&self) -> bool {
+        true
+    }
+
     pub fn update_message(&mut self, message: Message) -> Message {
-        self.assert_owner();
+        self.assert_admin();
         // set new message and get old message
         let mut message = message;
         std::mem::swap(self, &mut message);

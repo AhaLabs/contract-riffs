@@ -1,8 +1,3 @@
-//! # Status Message Contract
-//!
-//! This is an example contract using owneable and deployable components
-//!
-
 use near_components::{
     account::{self, FixedAccountId},
     account_id_from_input,

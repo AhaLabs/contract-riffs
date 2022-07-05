@@ -21,3 +21,19 @@
 //! ```
 
 pub use near_components_core::*;
+
+#[allow(dead_code, unused_variables)]
+mod private {
+    use near_components::{near_sdk::AccountId, witgen};
+
+    #[witgen]
+    pub fn set_owner(account_id: AccountId) {}
+
+    #[witgen]
+    pub fn get_owner() -> AccountId {
+        todo!("")
+    }
+
+    #[witgen]
+    pub fn deploy(account_id: AccountId) {}
+}

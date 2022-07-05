@@ -3,7 +3,7 @@ use near_components::{
     account::assert_private,
     near_sdk::{env, AccountId},
     near_units::parse_gas,
-    promise, reg,
+    promise, reg, account_id_from_input,
 };
 
 const FETCH_GAS: u64 = parse_gas!("70 TGas") as u64;
@@ -35,7 +35,7 @@ pub fn _deploy() {
 fn parse_input() -> (Vec<u8>, AccountId) {
     // v0_0_1.tenk.near
     // Currently checking string adds 10K to contract
-    let input_account_id: String = unsafe { String::from_utf8_unchecked(env::input().unwrap()) };
+    let input_account_id: String = account_id_from_input().into();
     let (version, subaccount) = input_account_id.as_str().split_once('.').unwrap();
     let arguments = version
         .strip_prefix('v')

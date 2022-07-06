@@ -3,15 +3,21 @@
 //! This is an example contract using owneable and deployable components
 //!
 
-use near_components::near_sdk::{
-    self,
-    borsh::{self, BorshDeserialize, BorshSerialize},
-    serde::{Deserialize, Serialize},
+use near_components::{
+    account_id_from_input,
+    near_sdk::{
+        self,
+        borsh::{self, BorshDeserialize, BorshSerialize},
+        env,
+        serde::{Deserialize, Serialize},
+        AccountId,
+    },
 };
 
 /// Uses ownable to check owner before deploying contract
 pub use near_components::prelude::*;
-pub use near_components_core::Ownable;
+use near_components_core::AssertOwnable;
+pub use near_components_core::{Deployable, Ownable};
 
 const MESSAGE_KEY: &str = "MESSAGE";
 
@@ -27,10 +33,43 @@ impl IntoKey for Message {
     }
 }
 
+// #[near_bindgen(riff)]
+impl Ownable for Message {}
+
+#[no_mangle]
+fn set_owner() {
+    let account_id = account_id_from_input();
+    Message::set_owner(account_id)
+}
+
+#[no_mangle]
+fn get_owner() {
+    let result = &format!("\"{}\"", Message::get_owner());
+    env::value_return(result.as_bytes())
+}
+
+#[no_mangle]
+fn is_owner() {
+    let res = Message::is_owner(account_id_from_input());
+    env::value_return((if res { "true" } else { "false" }).as_bytes());
+}
+
+// #[near_bindgen(riff)]
+impl Deployable for Message {}
+
+#[no_mangle]
+pub fn deploy() {
+  Message::deploy();
+}
+
+#[no_mangle]
+pub fn _deploy() {
+  Message::_deploy();
+}
+
 #[no_mangle]
 pub fn update_message() {
-    // any type can assert owner (weird Rust ;-))
-    "a".assert_owner();
+    Message::assert_owner();
 
     // Deserialize input into Message
     let msg: Message = near_sdk::serde_json::from_slice(
@@ -52,7 +91,7 @@ pub fn update_message() {
 #[no_mangle]
 pub fn get_message() {
     // Get message instance from storage and fail if doesn't exist
-    let message = Message::get_lazy().get().unwrap();
+    let message = Message::get_lazy().unwrap();
 
     // Serialize Message
     let result = near_sdk::serde_json::to_vec(&message)

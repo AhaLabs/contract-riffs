@@ -1,112 +1,22 @@
-# NEAR Scraps
+# NEAR Riffs
 
-Scraps of smart contracts! Better composability, upgradability, and re-use.
+Compose better smart contracts with drop-in riffs. Lower call costs; increase re-use & upgradeability.
 
-With NEAR scraps, you can split your Rust contract into distinct components, or scraps, that keep their storage separate from other scraps and add zero overhead to contract calls that don't need their functionality. What's this get you?
+With NEAR riffs, you can split your Rust contract into distinct components, or riffs, that keep their storage separate from other riffs and add zero overhead to contract calls that don't need their functionality. What's this get you?
 
 - Faster calls
 - Lower fees
 - More understandable, composable code
-- Scrap libraries (scrapyards?): anyone can publish scraps, anyone can use them
+- Riff libraries: anyone can publish riffs, anyone can use them
 - Generic factories: UI tools that allow launching a new account or subaccount with a [bootloader](#bootloader) contract, a safely-upgradeable contract that you can upgrade to any other once you're ready
 
 Wow!
-
 
 # How it works
 
 Currently NEAR smart contracts written in Rust are singletons; there is one struct or enum that represents the state of the contract. This state is stored in contract storage with the aptly named key `STATE`. Each time a contract method is called, this state is read, potentially updated, and written back to storage.
 
-# Other name ideas
-
-## fabric/generic
-
-- Scraps
-- Parts
-- Chips
-- Pieces
-- Shreds
-- Fragments
-- Segments
-- ~~Patches~~
-- ~~Bits~~
-
-## food
-
-- Crumbs
-- Cuts
-- Tapas
-- Fixins
-- Flavors
-- ~~Ingredients~~
-
-## construction, mosaic-making
-
-- Bricks
-- Tiles
-- Slabs
-- Tessera ("a small square tile of stone or glass used in making mosaics")
-- ~~Shards~~
-- ~~Blocks~~
-
-## electronics
-
-- Chips
-- ~~Circuits~~
-- ~~Modules~~
-
-## music
-
-- Riffs
-- Jingles
-- Ditties
-- Refrains
-- Phrases
-- Stanzas
-- Melodies
-- Rhythms
-- Harmonies
-- Tracks
-- Cuts
-- Euphonies
-- Dubs
-- Tones
-- Samples
-
-## (legal) writing
-
-- Clauses (get it? a contract has many clauses??)
-- Provisios
-- Provisions
-- Riders
-- snippets
-- ~~Subsection~~
-- ~~Subclause~~
-- ~~Grains~~
-
-## spoken language
-
-- Syllables
-- Phonemes
-
-## other
-
-- Tidbits
-- Components
-- Interfaces
-- Mixins
-- Specks
-- Atoms
-- Schemes
-- Subsystems
-- Elements
-- Tracts (like tracts of land)
-- Organelles
-- Organs
-- ~~Traits~~
-- ~~Boxes~~
-
-# Contract Component
+## Contract Component
 
 The concept of this singleton stored with a unique key in storage is called a _contract component_. Thus the current `STATE` singleton used by `near_sdk_rs` is a contract component.
 
@@ -129,7 +39,7 @@ Any contract that includes an owner component will then be _ownable_ and can res
 pub use contract_utils::owner::*;
 ```
 
-Note `pub` here.  This exports the owner's components methods.
+Note `pub` here.  This exports the owner component's methods.
 
 ## Example: Deploy Component
 
@@ -139,7 +49,7 @@ The `Owner` component is a _stateful_ component, however, the `Deploy` component
 pub use contract_utils::deploy::*;
 ```
 
-# Bootloader
+## Bootloader
 
 The bootloader contract is made up of these two core components. It's named after an [Operating System bootloader](https://en.wikipedia.org/wiki/Bootloader) which contains minimal the code to load the rest of OS.
 
@@ -178,5 +88,4 @@ This library depends on `near-sdk-rs` and re-exports it if you want to use the s
 
 ```toml
 contract-utils = { version = "0.0.1", features = ["wee_alloc"]}
-
 ```

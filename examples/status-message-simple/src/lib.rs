@@ -12,6 +12,7 @@ use near_components::{
         serde::{Deserialize, Serialize},
         AccountId,
     },
+    witgen,
 };
 
 /// Uses ownable to check owner before deploying contract
@@ -33,8 +34,15 @@ impl IntoKey for Message {
     }
 }
 
+struct DefaultOwner;
+impl Ownable for DefaultOwner {}
+
 // #[near_bindgen(riff)]
-impl Ownable for Message {}
+impl Ownable for Message {
+    fn set_owner(account_id: AccountId) {
+        DefaultOwner::set_owner(account_id)
+    }
+}
 
 #[no_mangle]
 fn set_owner() {
@@ -59,12 +67,12 @@ impl Deployable for Message {}
 
 #[no_mangle]
 pub fn deploy() {
-  Message::deploy();
+    Message::deploy();
 }
 
 #[no_mangle]
 pub fn _deploy() {
-  Message::_deploy();
+    Message::_deploy();
 }
 
 #[no_mangle]
@@ -99,4 +107,24 @@ pub fn get_message() {
 
     // Return serelaized result
     near_sdk::env::value_return(&result)
+}
+
+#[allow(dead_code, unused_variables)]
+mod private {
+    use super::witgen;
+    use near_components::near_sdk::AccountId;
+
+    #[witgen]
+    /// @change
+    fn set_owner(account_id: AccountId) {}
+
+    #[witgen]
+    fn get_owner() -> AccountId {
+        todo!("")
+    }
+
+    #[witgen]
+    fn is_owner(account_id: AccountId) -> bool {
+        todo!()
+    }
 }

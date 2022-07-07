@@ -1,36 +1,59 @@
-use crate::Owner;
+use crate::{AssertOwnable, Ownable};
 use near_components::{
     account::assert_private,
+    account_id_from_input,
     near_sdk::{env, AccountId},
     near_units::parse_gas,
-    promise, reg, account_id_from_input,
+    promise, reg,
 };
 
 const FETCH_GAS: u64 = parse_gas!("70 TGas") as u64;
 const DEPLOY_GAS: u64 = parse_gas!("70 TGas") as u64;
 
-#[no_mangle]
-pub fn deploy() {
-    Owner::assert();
-    let (arguments, account_id) = parse_input();
-    let id = promise::promise_create(account_id.as_str(), "fetch", &arguments, 0, FETCH_GAS);
-    env::promise_return(reg::promise_then_for_current(
-        id,
-        "_deploy",
-        &[],
-        0,
-        DEPLOY_GAS,
-    ))
+struct Deployer;
+
+impl Ownable for Deployer {}
+
+//#[default(Deployer)]
+pub trait Deployable {
+    /// Deploy a contract from a passed registry
+    fn deploy() {
+      Deployer::deploy()
+    }
+
+    fn _deploy() {
+      Deployer::_deploy()
+    }
 }
 
-#[no_mangle]
-pub fn _deploy() {
-    assert_private();
-    let bytes_reg = reg::promise_result(0, 0);
-    env::promise_return(reg::promise_batch_action_deploy_contract_for_current(
-        bytes_reg,
-    ))
+impl Deployer {
+    fn deploy() {
+        Self::assert_owner();
+        let (arguments, account_id) = parse_input();
+        let id = promise::promise_create(account_id.as_str(), "fetch", &arguments, 0, FETCH_GAS);
+        env::promise_return(reg::promise_then_for_current(
+            id,
+            "_deploy",
+            &[],
+            0,
+            DEPLOY_GAS,
+        ))
+    }
+
+    fn _deploy() {
+        assert_private();
+        let bytes_reg = reg::promise_result(0, 0);
+        env::promise_return(reg::promise_batch_action_deploy_contract_for_current(
+            bytes_reg,
+        ))
+    }
 }
+
+// #[no_mangle]
+// pub fn deploy() {}
+
+// #[no_mangle]
+// pub fn _deploy() {}
 
 fn parse_input() -> (Vec<u8>, AccountId) {
     // v0_0_1.tenk.near

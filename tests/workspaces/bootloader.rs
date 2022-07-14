@@ -1,9 +1,14 @@
 use near_units::{parse_gas, parse_near};
 use serde_json::{json, Value};
+//use env::is_valid_account_id;
 
 use crate::utils::{init, init_with_launcher};
 use near_components::near_sdk::AccountId;
 
+
+//bootloader initialization test
+//Description
+//
 #[tokio::test]
 async fn initialize_correctly() -> anyhow::Result<()> {
     let worker = &workspaces::sandbox().await?;
@@ -16,10 +21,18 @@ async fn initialize_correctly() -> anyhow::Result<()> {
     Ok(())
 }
 
+
+//CAN DELETE THIS TEST
+//Ownership transfer
+//Description:
+//transfer ownership from original owner to Alice
 #[tokio::test]
 async fn owner_can_transfer() -> anyhow::Result<()> {
+    //initialize worker and root account
     let worker = &workspaces::sandbox().await?;
     let root = worker.root_account();
+    //initialize bootloader contract 
+    //see ./utils.rs for init(...) implementation
     let (bootloader, _) = init(worker, &root, false, false).await?;
 
     let alice = root
@@ -39,6 +52,84 @@ async fn owner_can_transfer() -> anyhow::Result<()> {
     Ok(())
 }
 
+//Name: Successive ownership transfer
+//Description:
+//tests that new owner is able to transfer ownership
+//tests that past owners no longer have owner access
+//
+//Test Steps:
+//transfer ownership from root account to Alice, confirm root cannot transfer after ownership transferred to Alice
+//transfer ownership from Alice to Kate, confirm Alice cannot transfer after ownership transferred to Kate
+#[tokio::test]
+async fn successive_ownership_transfer() -> anyhow::Result<()> {
+//Configuring Test Env
+    //initialize worker and root account
+    let worker = &workspaces::sandbox().await?;
+    let root = worker.root_account();
+    //initialize bootloader contract --> see ./utils.rs for init(...) implementation
+    let (bootloader, _) = init(worker, &root, false, false).await?;
+    //create alice.root subaccount 
+    let alice = root
+        .create_subaccount(worker, "alice")
+        .transact()
+        .await?
+        .unwrap();
+    //create kate.root subaccount
+    let kate = root
+    .create_subaccount(worker, "kate")
+    .transact()
+    .await?
+    .unwrap();
+    
+//Test Part 1: transfer ownership from root to alice
+    //root account call "set_owner" to alice 
+    let res = root
+        .call(worker, bootloader.id(), "set_owner")
+        .args(alice.id().as_bytes().to_vec())
+        .transact()
+        .await?;
+    assert!(res.is_success());
+
+    //Confirm owner is Alice
+    let res = bootloader.view(worker, "get_owner", vec![0]).await?;
+    let owner = res.json::<String>()?;
+    assert_eq!(owner, alice.id().to_string());
+
+    //confirm root cannot call "set_owner" again
+    let res = root
+        .call(worker, bootloader.id(), "set_owner")
+        .args(kate.id().as_bytes().to_vec())
+        .transact()
+        .await;
+    assert!(res.is_err());
+
+//Test Part 2: successive ownership transfer 
+    //alice account call "set_owner" to kate
+    let res = alice
+        .call(worker, bootloader.id(), "set_owner")
+        .args(kate.id().as_bytes().to_vec())
+        .transact()
+        .await?;
+    assert!(res.is_success());
+
+    //confirm owner is Kate
+    let res = bootloader.view(worker, "get_owner", vec![0]).await?;
+    let owner = res.json::<String>()?;
+    assert_eq!(owner, kate.id().to_string());
+
+    //confirm alice cannot call "set_owner" again
+    let res = alice
+        .call(worker, bootloader.id(), "set_owner")
+        .args(alice.id().as_bytes().to_vec())
+        .transact()
+        .await;
+    assert!(res.is_err());
+    Ok(())
+}
+
+
+
+//CAN DELETE THIS TEST
 #[tokio::test]
 async fn non_owner_cannot_transfer() -> anyhow::Result<()> {
     let worker = &workspaces::sandbox().await?;
@@ -56,9 +147,48 @@ async fn non_owner_cannot_transfer() -> anyhow::Result<()> {
         .transact()
         .await;
     println!("{:#?}", res);
+    //assert!(res.is_err());
     assert!(res.is_err());
     Ok(())
 }
+
+
+
+//Name: Non-conformat account id
+//Description:
+//tests that owner cannot be set to a non-conformat account id
+//Test Steps: attempt to set owner a non-conformat account id...
+//Reference - near account id rules: https://docs.near.org/docs/concepts/account
+#[tokio::test]
+async fn cannot_set_owner_to_noncomformantaccount() -> anyhow::Result<()> {
+//Configuring Test Env
+    //initialize worker and root account
+    let worker = &workspaces::sandbox().await?;
+    let root = worker.root_account();
+    //initialize bootloader contract --> see ./utils.rs for init(...) implementation
+    let (bootloader, _) = init(worker, &root, false, false).await?;
+    //create alice.root subaccount 
+    let alice = root
+        .create_subaccount(worker, "alice")
+        .transact()
+        .await?
+        .unwrap();  
+
+    //create invalid account id
+    let non_conformant_id = "sub.buy_d1gitz@atata@b0-rg.c_0_m";
+    //confirm account id is not valid
+    assert!(!near_sdk::env::is_valid_account_id(non_conformant_id.as_bytes()));
+//Test: Attempt set owner to non-conformat id
+    let res = root
+        .call(worker, bootloader.id(), "set_owner")
+        .args(non_conformant_id.as_bytes().to_vec())
+        .transact()
+        .await;
+    println!("{:#?}", res);
+    assert!(res.is_err());
+    Ok(())
+}
+
 
 #[tokio::test]
 async fn can_redeploy_simple() -> anyhow::Result<()> {
@@ -124,6 +254,9 @@ async fn can_launch() -> anyhow::Result<()> {
     println!("FINAL RES\n\n\n{:#?}", String::from_utf8(res.result)?);
     Ok(())
 }
+
+
+
 
 async fn deploy_with_simple(simple: bool) -> anyhow::Result<()> {
     let worker = &workspaces::sandbox().await?;

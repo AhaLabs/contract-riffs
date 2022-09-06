@@ -10,8 +10,6 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::env;
 use near_sdk::IntoStorageKey;
 
-use crate::reg::storage_write_from_reg;
-
 const ERR_VALUE_SERIALIZATION: &str = "Cannot serialize value with Borsh";
 const ERR_VALUE_DESERIALIZATION: &str = "Cannot deserialize value with Borsh";
 
@@ -24,47 +22,47 @@ pub struct LazyOption<T> {
 }
 
 impl<T> LazyOption<T> {
-    /// Returns `true` if the value is present in the storage.
-    pub fn is_some(&self) -> bool {
-        env::storage_has_key(&self.storage_key)
-    }
+    // /// Returns `true` if the value is present in the storage.
+    // pub fn is_some(&self) -> bool {
+    //     env::storage_has_key(&self.storage_key)
+    // }
 
-    /// Returns `true` if the value is not present in the storage.
-    pub fn is_none(&self) -> bool {
-        !self.is_some()
-    }
+    // /// Returns `true` if the value is not present in the storage.
+    // pub fn is_none(&self) -> bool {
+    //     !self.is_some()
+    // }
 
     /// Reads the raw value from the storage
     fn get_raw(&self) -> Option<Vec<u8>> {
         env::storage_read(&self.storage_key)
     }
 
-    /// Removes the value from the storage.
-    /// Returns true if the element was present.
-    fn remove_raw(&mut self) -> bool {
-        env::storage_remove(&self.storage_key)
-    }
+    // /// Removes the value from the storage.
+    // /// Returns true if the element was present.
+    // fn remove_raw(&mut self) -> bool {
+    //     env::storage_remove(&self.storage_key)
+    // }
 
-    /// Removes the raw value from the storage and returns it as an option.
-    pub fn take_raw(&mut self) -> Option<Vec<u8>> {
-        if self.remove_raw() {
-            Some(env::storage_get_evicted().unwrap())
-        } else {
-            None
-        }
-    }
+    // /// Removes the raw value from the storage and returns it as an option.
+    // pub fn take_raw(&mut self) -> Option<Vec<u8>> {
+    //     if self.remove_raw() {
+    //         Some(env::storage_get_evicted().unwrap())
+    //     } else {
+    //         None
+    //     }
+    // }
 
     pub fn set_raw(&mut self, raw_value: &[u8]) -> bool {
         env::storage_write(&self.storage_key, raw_value)
     }
 
-    pub fn set_reg(&mut self, register_id: u64) -> bool {
-        match storage_write_from_reg(&self.storage_key, register_id) {
-            0 => false,
-            1 => true,
-            _ => env::abort(),
-        }
-    }
+    // pub fn set_reg(&mut self, register_id: u64) -> bool {
+    //     match storage_write_from_reg(&self.storage_key, register_id) {
+    //         0 => false,
+    //         1 => true,
+    //         _ => env::abort(),
+    //     }
+    // }
 
     pub fn replace_raw(&mut self, raw_value: &[u8]) -> Option<Vec<u8>> {
         if self.set_raw(raw_value) {
@@ -108,16 +106,16 @@ where
         }
     }
 
-    /// Removes the value from storage without reading it.
-    /// Returns whether the value was present.
-    pub fn remove(&mut self) -> bool {
-        self.remove_raw()
-    }
+    // /// Removes the value from storage without reading it.
+    // /// Returns whether the value was present.
+    // pub fn remove(&mut self) -> bool {
+    //     self.remove_raw()
+    // }
 
-    /// Removes the value from storage and returns it as an option.
-    pub fn take(&mut self) -> Option<T> {
-        self.take_raw().map(|v| Self::deserialize_value(&v))
-    }
+    // /// Removes the value from storage and returns it as an option.
+    // pub fn take(&mut self) -> Option<T> {
+    //     self.take_raw().map(|v| Self::deserialize_value(&v))
+    // }
 
     /// Gets the value from storage and returns it as an option.
     pub fn get(&self) -> Option<T> {
@@ -136,24 +134,24 @@ where
             .map(|v| Self::deserialize_value(&v))
     }
 
-    pub fn mut_map<F: FnOnce(T) -> T>(&mut self, f: F) -> Option<T> {
-        self.replace(&f(self.get()?))
-    }
+    // pub fn mut_map<F: FnOnce(T) -> T>(&mut self, f: F) -> Option<T> {
+    //     self.replace(&f(self.get()?))
+    // }
 
-    pub fn mut_map_or_else<D, F>(&mut self, default: D, f: F) -> Option<T>
-    where
-        D: FnOnce() -> T,
-        F: FnOnce(T) -> T,
-    {
-        self.replace(&self.get().map_or_else(default, f))
-    }
+    // pub fn mut_map_or_else<D, F>(&mut self, default: D, f: F) -> Option<T>
+    // where
+    //     D: FnOnce() -> T,
+    //     F: FnOnce(T) -> T,
+    // {
+    //     self.replace(&self.get().map_or_else(default, f))
+    // }
 
-    pub fn map<F, U>(&self, f: F) -> Option<U>
-    where
-        F: FnOnce(T) -> Option<U>,
-    {
-        f(self.get()?)
-    }
+    // pub fn map<F, U>(&self, f: F) -> Option<U>
+    // where
+    //     F: FnOnce(T) -> Option<U>,
+    // {
+    //     f(self.get()?)
+    // }
 }
 
 impl<T> std::fmt::Debug for LazyOption<T>
@@ -179,38 +177,38 @@ mod tests {
     #[test]
     pub fn test_all() {
         let mut a = LazyOption::new(b"a", None);
-        assert!(a.is_none());
+        // assert!(a.is_none());
         a.set(&42u32);
-        assert!(a.is_some());
+        // assert!(a.is_some());
         assert_eq!(a.get(), Some(42));
-        assert!(a.is_some());
-        assert_eq!(a.replace(&95), Some(42));
-        assert!(a.is_some());
-        assert_eq!(a.take(), Some(95));
-        assert!(a.is_none());
-        assert_eq!(a.replace(&105), None);
-        assert!(a.is_some());
-        assert_eq!(a.get(), Some(105));
-        assert!(a.remove());
-        assert!(a.is_none());
-        assert_eq!(a.get(), None);
-        assert_eq!(a.take(), None);
-        assert!(a.is_none());
+        // assert!(a.is_some());
+        // assert_eq!(a.replace(&95), Some(42));
+        // assert!(a.is_some());
+        // assert_eq!(a.take(), Some(95));
+        // assert!(a.is_none());
+        // assert_eq!(a.replace(&105), None);
+        // assert!(a.is_some());
+        // assert_eq!(a.get(), Some(105));
+        // assert!(a.remove());
+        // assert!(a.is_none());
+        // assert_eq!(a.get(), None);
+        // assert_eq!(a.take(), None);
+        // assert!(a.is_none());
     }
 
     #[test]
     pub fn test_multi() {
         let mut a = LazyOption::new(b"a", None);
         let mut b = LazyOption::new(b"b", None);
-        assert!(a.is_none());
-        assert!(b.is_none());
+        assert!(a.get().is_none());
+        assert!(b.get().is_none());
         a.set(&42u32);
-        assert!(b.is_none());
-        assert!(a.is_some());
+        assert!(b.get().is_none());
+        assert!(a.get().is_some());
         assert_eq!(a.get(), Some(42));
         b.set(&32u32);
-        assert!(a.is_some());
-        assert!(b.is_some());
+        assert!(a.get().is_some());
+        assert!(b.get().is_some());
         assert_eq!(a.get(), Some(42));
         assert_eq!(b.get(), Some(32));
     }
@@ -218,7 +216,7 @@ mod tests {
     #[test]
     pub fn test_init_value() {
         let a = LazyOption::new(b"a", Some(&42u32));
-        assert!(a.is_some());
+        assert!(a.get().is_some());
         assert_eq!(a.get(), Some(42));
     }
 

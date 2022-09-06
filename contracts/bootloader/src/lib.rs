@@ -27,6 +27,7 @@ mod private {
     use near_components::{near_sdk::AccountId, witgen};
 
     #[witgen]
+    /// @change
     pub fn set_owner(account_id: AccountId) {}
 
     #[witgen]
@@ -34,6 +35,9 @@ mod private {
         todo!("")
     }
 
-    #[witgen]
-    pub fn deploy(account_id: AccountId) {}
+  #[witgen]
+  /// Redeploys contract from  provided registry. 
+  /// e.g. `v0_0_1.contract.testnet`
+  /// @change
+  pub fn deploy(account_id: AccountId) {}
 }

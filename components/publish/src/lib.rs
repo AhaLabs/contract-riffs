@@ -4,7 +4,7 @@ use near_components::{
     reg,
 };
 
-use near_components_core::Owner;
+use near_components_core::{Owner};
 
 const ONE_TGAS: Gas = Gas(parse_gas!("1 Tgas") as u64);
 
@@ -20,18 +20,18 @@ fn call_registry(function_name: &str) {
 
 #[no_mangle]
 pub fn publish_patch() {
-    Owner::assert();
+    Owner::assert_owner();
     call_registry("patch")
 }
 
 #[no_mangle]
 pub fn publish_minor() {
-    Owner::assert();
+    Owner::assert_owner();
     call_registry("minor")
 }
 
 #[no_mangle]
 pub fn publish_major() {
-    Owner::assert();
+    Owner::assert_owner();
     call_registry("major")
 }

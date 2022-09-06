@@ -1,6 +1,6 @@
 use near_sdk::{env, sys, Balance, Gas};
 
-use crate::account::{self, FixedAccountId};
+use crate::account::FixedAccountId;
 
 pub fn promise_then(
     promise_idx: u64,
@@ -72,14 +72,6 @@ pub fn promise_batch_action_function_call_fetch(
             gas,
         )
     }
-}
-
-pub fn cheap_deploy(register: u64) -> u64 {
-    let id = account::promise_batch_create_for_current(register);
-    unsafe {
-        sys::promise_batch_action_deploy_contract(id, u64::MAX, register);
-    }
-    id
 }
 
 pub fn promise_result() -> u64 {

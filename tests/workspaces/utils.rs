@@ -1,10 +1,9 @@
-use anyhow::Result;
-use near_units::{parse_gas, parse_near};
+use anyhow::{Context, Result};
+use near_units::{parse_near};
 use serde_json::{json, Value};
+use workspaces::network::Sandbox;
 use workspaces::operations::Function;
-use workspaces::prelude::*;
-use workspaces::result::{CallExecutionDetails, ValueOrReceiptId};
-use workspaces::types::{KeyType, SecretKey};
+use workspaces::result::{ExecutionFinalResult};
 use workspaces::{Account, Contract, DevNetwork, Worker};
 
 lazy_static_include::lazy_static_include_bytes! {
@@ -17,14 +16,90 @@ lazy_static_include::lazy_static_include_bytes! {
 
 }
 
-pub fn try_into_bytes(details: CallExecutionDetails) -> anyhow::Result<Vec<u8>> {
-    let outcome = details.outcomes()[1].clone();
-    if let ValueOrReceiptId::Value(result) = outcome.into_result()? {
-        base64::decode(result).map_err(Into::into)
-    } else {
-        anyhow::bail!("Expected value")
+pub struct TestEnv {
+    pub root: Account,
+    worker: Worker<Sandbox>,
+    pub alice: Account,
+    pub bob: Account,
+    bootloader: Option<Contract>,
+    registry: Option<Contract>,
+}
+
+impl TestEnv {
+    pub async fn init() -> Result<Self> {
+        let worker = workspaces::sandbox().await?;
+        let root = worker.root_account()?;
+        let alice = root
+            .create_subaccount("alice")
+            .transact()
+            .await?
+            .into_result()?;
+        let bob = root
+            .create_subaccount("bob")
+            .transact()
+            .await?
+            .into_result()?;
+
+        Ok(Self {
+            worker,
+            root,
+            alice,
+            bob,
+            bootloader: None,
+            registry: None,
+        })
+    }
+
+    pub async fn with_bootloader() -> Result<(Contract, Self)> {
+      let this = Self::init().await?.add_bootloader().await?;
+      let bootloader = deploy_and_init(&this.worker, &BOOTLOADER, &this.root).await?;
+      Ok((bootloader, this))
+    }
+
+    pub async fn add_bootloader(mut self) -> Result<Self> {
+        self.bootloader = Some(deploy_and_init(&self.worker, &BOOTLOADER, &self.root).await?);
+        Ok(self)
+    }
+
+    pub async fn add_registry(mut self) -> Result<Self> {
+        self.registry = Some(deploy_and_init(&self.worker, &REGISTRY, &self.root).await?);
+        Ok(self)
+    }
+
+    pub fn bootloader(&self) -> Option<&Contract> {
+        self.bootloader.as_ref()
+    }
+
+    pub fn registry(&self) -> Option<&Contract> {
+        self.registry.as_ref()
+    }
+
+    pub fn worker(&self) -> &Worker<Sandbox> {
+        &self.worker
+    }
+
+    pub async fn patch(
+        &self,
+        bytes: Vec<u8>,
+    ) -> Result<ExecutionFinalResult, workspaces::error::Error> {
+        self.root
+            .call(self.registry().unwrap().id(), "patch")
+            .args(bytes)
+            .gas(300_000_000_000_000)
+            .deposit(parse_near!("10 N"))
+            .transact()
+            .await
     }
 }
+
+// pub fn try_into_bytes(details: CallExecutionDetails) -> anyhow::Result<Vec<u8>> {
+//     let outcome = details.outcomes()[1].clone();
+//     if let ValueOrReceiptId::Value(result) = outcome.into_result()? {
+//         base64::decode(result).map_err(Into::into)
+//     } else {
+//         anyhow::bail!("Expected value")
+//     }
+// }
 
 pub async fn init(
     worker: &Worker<impl DevNetwork>,
@@ -35,7 +110,7 @@ pub async fn init(
     let bootloader = worker.dev_deploy(&BOOTLOADER).await?;
     let owner_bytes = root.id().as_bytes().to_vec();
     let res = root
-        .call(worker, bootloader.id(), "set_owner")
+        .call(bootloader.id(), "set_owner")
         .args(owner_bytes)
         .gas(300_000_000_000_000)
         .transact()
@@ -45,21 +120,21 @@ pub async fn init(
 
     let registry = if init_registry {
         let contract = root
-            .create_subaccount(worker, "contract")
+            .create_subaccount("contract")
             .initial_balance(parse_near!("20 N"))
             .transact()
             .await?
             .unwrap();
         let registry = contract
-            .create_subaccount(worker, "registry")
+            .create_subaccount("registry")
             .initial_balance(parse_near!("10 N"))
             .transact()
             .await?
             .unwrap();
-        let registry = registry.deploy(worker, &REGISTRY).await?.unwrap();
+        let registry = registry.deploy(&REGISTRY).await?.unwrap();
 
         let res = root
-            .call(worker, registry.id(), "set_owner")
+            .call(registry.id(), "set_owner")
             .args(root.id().as_bytes().to_vec())
             .gas(300_000_000_000_000)
             // .deposit(parse_near!("1N"))
@@ -78,7 +153,7 @@ pub async fn init(
         // let registry = worker.dev_deploy(&REGISTRY).await?;
 
         let res = root
-            .call(worker, registry.id(), "patch")
+            .call(registry.id(), "patch")
             .args(if simple {
                 STATUS_MESSAGE.to_vec()
             } else {
@@ -109,17 +184,20 @@ pub async fn init(
     Ok((bootloader, registry))
 }
 
-pub async fn deploy(
+pub async fn deploy_and_init(
     worker: &Worker<impl DevNetwork>,
     bytes: &[u8],
     owner: &Account,
-    account: &Account,
 ) -> Result<Contract> {
-    let account = worker.dev_deploy(bytes).await;
-    account.map(|contract| {
-        contract.call(worker, "set_owner");
-        contract
-    })
+    let contract = worker.dev_deploy(bytes).await?;
+    let res = contract
+        .call("set_owner")
+        .args(format!("\"{}\"", owner.id()).as_bytes().to_vec())
+        .transact()
+        .await
+        .with_context(|| format!("Owner that failed: {}", owner.id()))?;
+    println!("Created Contract: {:?}",res.logs());
+    Ok(contract)
 }
 
 pub async fn init_with_launcher(
@@ -127,13 +205,13 @@ pub async fn init_with_launcher(
     root: &Account,
     bootloader: &Account,
 ) -> Result<(Contract, Contract)> {
-    let res = bootloader.deploy(worker, &NEAR_WASM).await?.unwrap();
+    let res = bootloader.deploy(&NEAR_WASM).await?.unwrap();
 
     let launcher = worker.dev_deploy(&CONTRACT_LAUNCHER).await?;
 
     let owner_bytes = root.id().as_bytes().to_vec();
     let res = root
-        .call(worker, launcher.id(), "set_owner")
+        .call(launcher.id(), "set_owner")
         .args(owner_bytes)
         .gas(300_000_000_000_000)
         .transact()
@@ -154,15 +232,15 @@ pub async fn init_with_launcher(
     //     .await?
     //     .unwrap();
     let registry = bootloader
-        .create_subaccount(worker, "registry")
+        .create_subaccount("registry")
         .initial_balance(parse_near!("9 N"))
         .transact()
         .await?
         .unwrap();
-    let registry = registry.deploy(worker, &REGISTRY).await?.unwrap();
+    let registry = registry.deploy(&REGISTRY).await?.unwrap();
 
     let res = root
-        .call(worker, registry.id(), "set_owner")
+        .call(registry.id(), "set_owner")
         .args(bootloader.id().as_bytes().to_vec())
         .gas(300_000_000_000_000)
         // .deposit(parse_near!("1N"))
@@ -170,11 +248,11 @@ pub async fn init_with_launcher(
         .await?;
 
     let res = root
-        .batch(worker, launcher.id())
+        .batch(launcher.id())
         .call(Function::new("update").args_json(json! ({
           "registry": registry.id(),
           "root_account": bootloader.id(),
-        }))?)
+        })))
         .transact()
         .await?;
 
@@ -199,7 +277,7 @@ pub async fn init_with_launcher(
     // let registry = worker.dev_deploy(&REGISTRY).await?;
 
     let res = bootloader
-        .call(worker, registry.id(), "patch")
+        .call(registry.id(), "patch")
         .args(BOOTLOADER.to_vec())
         .gas(300_000_000_000_000)
         .deposit(parse_near!("10N"))

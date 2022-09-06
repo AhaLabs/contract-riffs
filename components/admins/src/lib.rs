@@ -1,14 +1,12 @@
-use near_components::{
-    lazy::Lazy,
-    near_sdk::{
-        self,
-        borsh::{self, BorshDeserialize, BorshSerialize},
-        env, near_bindgen, require, AccountId,
-    },
-    IntoKey,
+use near_components::prelude::*;
+
+use near_components::near_sdk::{
+    self,
+    borsh::{self, BorshDeserialize, BorshSerialize},
+    env, near_bindgen, require, AccountId,
 };
 
-pub use near_components_core::{Ownable, AssertOwnable};
+pub use near_components_core::{Owner};
 
 const ADMINS_KEY: &str = "ADMINS";
 
@@ -65,16 +63,14 @@ pub trait Administratable {
     }
 
     fn is_admin(account_id: AccountId) -> bool {
-        Admins::get_lazy()
-            .unwrap_or_default()
-            .is_admin(account_id)
+        Admins::get_lazy().unwrap_or_default().is_admin(account_id)
     }
 }
 
-pub trait OwnableAdminster: Administratable + Ownable {}
+// pub trait OwnableAdminster: Administratable + Ownable {}
 
 impl Administratable for Admins {}
-impl Ownable for Admins {}
+// impl Ownable for Admins {}
 
 // #[generate_trait]
 impl Admins {

@@ -2,7 +2,7 @@ use crate::Owner;
 use near_components::{
     account::assert_private,
     account_id_from_input,
-    near_sdk::{self, env, near_bindgen, AccountId},
+    near_sdk::{env, AccountId},
     near_units::parse_gas,
     prelude::Lazy,
     promise, reg,
@@ -11,7 +11,6 @@ use near_components::{
 const FETCH_GAS: u64 = parse_gas!("70 TGas") as u64;
 const DEPLOY_GAS: u64 = parse_gas!("70 TGas") as u64;
 
-#[near_bindgen(riff)]
 #[derive(Default)]
 pub struct Deployer;
 
@@ -20,7 +19,7 @@ impl Lazy for Deployer {
         Some(Deployer {})
     }
 
-    fn set_lazy(value: Self) -> Option<Self> {
+    fn set_lazy(_: Self) -> Option<Self> {
         None
     }
 }
@@ -62,12 +61,12 @@ impl Deployer {
 
 #[no_mangle]
 pub fn deploy() {
-  Deployer::deploy();
+    Deployer::deploy();
 }
 
 #[no_mangle]
 pub fn _deploy() {
-  Deployer::_deploy();
+    Deployer::_deploy();
 }
 
 fn parse_input() -> (Vec<u8>, AccountId) {
@@ -89,10 +88,9 @@ fn parse_input() -> (Vec<u8>, AccountId) {
 //   use near_components::{near_sdk::AccountId, witgen};
 
 //   #[witgen]
-//   /// Redeploys contract from  provided registry. 
+//   /// Redeploys contract from  provided registry.
 //   /// e.g. `v0_0_1.contract.testnet`
 //   /// @change
 //   pub fn deploy(account_id: AccountId) {}
 
 // }
-

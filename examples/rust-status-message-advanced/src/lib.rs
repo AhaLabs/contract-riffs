@@ -44,7 +44,7 @@ impl Contract {
     /// A change call to set the message
     #[payable]
     pub fn set_message(&mut self, message: Message) {
-        self.assert_owner();
+        Owner::assert_owner();
         self.message = message;
     }
 }

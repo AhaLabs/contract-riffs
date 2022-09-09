@@ -11,44 +11,35 @@ pub fn assert_private() {
 }
 
 pub fn predecessor_account_id() -> FixedAccountId {
-    unsafe {
-        sys::predecessor_account_id(0);
-    }
-    read_register(0)
+    read_register(reg::predecessor_account_id())
 }
 
 pub fn current_account_id() -> FixedAccountId {
-    unsafe {
-        sys::current_account_id(0);
-    }
-    read_register(0)
+    read_register(reg::current_account_id())
 }
 
 pub fn input_account_id() -> FixedAccountId {
-    unsafe {
-        sys::input(0);
-    }
-    read_register(0)
+    read_register(reg::input())
 }
 
 pub fn read_register(register_id: u64) -> FixedAccountId {
     let mut res = [0u8; 64];
     unsafe {
-        let _ = sys::read_register(register_id, res.as_mut_ptr() as _);
+        sys::read_register(register_id, res.as_mut_ptr() as _);
     }
     res
 }
 
-pub fn create_promise_for_predecessor(register_id: u64) -> u64 {
-    unsafe {
-        sys::predecessor_account_id(register_id);
-    };
-    reg::promise_batch_create(register_id)
-}
+// pub fn create_promise_for_predecessor(register_id: u64) -> u64 {
+//     unsafe {
+//         sys::predecessor_account_id(register_id);
+//     };
+//     reg::promise_batch_create(register_id)
+// }
 
-pub fn promise_batch_create_for_current(register_id: u64) -> u64 {
-    unsafe {
-        sys::current_account_id(register_id);
-    };
-    reg::promise_batch_create(register_id)
-}
+// pub fn promise_batch_create_for_current(register_id: u64) -> u64 {
+//     unsafe {
+//         sys::current_account_id(register_id);
+//     };
+//     reg::promise_batch_create(register_id)
+// }

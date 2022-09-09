@@ -4,11 +4,9 @@
 //!
 
 use near_components::{
-    account_id_from_input,
     near_sdk::{
         self,
         borsh::{self, BorshDeserialize, BorshSerialize},
-        env,
         serde::{Deserialize, Serialize},
         AccountId,
     },
@@ -17,13 +15,13 @@ use near_components::{
 
 /// Uses ownable to check owner before deploying contract
 pub use near_components::prelude::*;
-use near_components_core::AssertOwnable;
-pub use near_components_core::{Deployable, Ownable};
+pub use near_components_core::*;
 
 const MESSAGE_KEY: &str = "MESSAGE";
 
 #[derive(BorshSerialize, BorshDeserialize, Deserialize, Serialize, Default)]
 #[serde(crate = "near_sdk::serde")]
+#[witgen]
 pub struct Message {
     text: String,
 }
@@ -34,50 +32,9 @@ impl IntoKey for Message {
     }
 }
 
-struct DefaultOwner;
-impl Ownable for DefaultOwner {}
-
-// #[near_bindgen(riff)]
-impl Ownable for Message {
-    fn set_owner(account_id: AccountId) {
-        DefaultOwner::set_owner(account_id)
-    }
-}
-
-#[no_mangle]
-fn set_owner() {
-    let account_id = account_id_from_input();
-    Message::set_owner(account_id)
-}
-
-#[no_mangle]
-fn get_owner() {
-    let result = &format!("\"{}\"", Message::get_owner());
-    env::value_return(result.as_bytes())
-}
-
-#[no_mangle]
-fn is_owner() {
-    let res = Message::is_owner(account_id_from_input());
-    env::value_return((if res { "true" } else { "false" }).as_bytes());
-}
-
-// #[near_bindgen(riff)]
-impl Deployable for Message {}
-
-#[no_mangle]
-pub fn deploy() {
-    Message::deploy();
-}
-
-#[no_mangle]
-pub fn _deploy() {
-    Message::_deploy();
-}
-
 #[no_mangle]
 pub fn update_message() {
-    Message::assert_owner();
+    Owner::assert_owner();
 
     // Deserialize input into Message
     let msg: Message = near_sdk::serde_json::from_slice(
@@ -111,9 +68,9 @@ pub fn get_message() {
 
 #[allow(dead_code, unused_variables)]
 mod private {
-    use super::witgen;
-    use near_components::near_sdk::AccountId;
+    use super::*;
 
+    
     #[witgen]
     /// @change
     fn set_owner(account_id: AccountId) {}
@@ -127,4 +84,16 @@ mod private {
     fn is_owner(account_id: AccountId) -> bool {
         todo!()
     }
+
+    #[witgen]
+    pub fn update_message(message: Message) -> Option<Message>{
+      todo!()
+    }
+
+    #[witgen]
+    pub fn get_message() -> Option<Message>{
+      todo!()
+    }
+
+   
 }

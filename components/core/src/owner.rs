@@ -66,7 +66,7 @@ impl Owner {
     /// @change
     pub fn set_owner(&mut self) {
         if let Some(owner) = &self.0 {
-            require!(*owner == env::predecessor_account_id())
+            require!(*owner == env::predecessor_account_id(), "only owner can transfer ownership")
         }
         let account_id = account_id_from_input();
         self.0 = Some(account_id);
@@ -76,7 +76,11 @@ impl Owner {
         env::value_return(self.0.as_ref().unwrap().as_bytes())
     }
 
-    fn is_owner(self, account_id: AccountId) -> bool {
+    pub fn get_owner_json(&self) {
+      env::value_return(format!("\"{}\"", self.0.as_ref().unwrap()).as_bytes())
+  }
+
+    pub fn is_owner(self, account_id: AccountId) -> bool {
         self.0.unwrap() == account_id
     }
 }
@@ -91,4 +95,9 @@ pub fn set_owner() {
 #[no_mangle]
 pub fn get_owner() {
   Owner::get_lazy().unwrap().get_owner()
+}
+
+#[no_mangle]
+pub fn get_owner_json() {
+  Owner::get_lazy().unwrap().get_owner_json()
 }

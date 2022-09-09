@@ -4,7 +4,7 @@ use near_components::{
         borsh::{self, BorshDeserialize, BorshSerialize},
         env, ext_contract, near_bindgen,
         serde::Serialize,
-        AccountId, Promise, PublicKey,
+        AccountId, Promise, PromiseOrValue, PublicKey,
     },
     witgen,
 };

@@ -49,7 +49,7 @@ pub use contract_utils::prelude::*;
 
 ## Registry
 
-A contract registry allows you to publish versions of a contract. Its four methods are `patch`, `minor`, `major`, and `fetch`.  The first three are for publishing and increase the version of the contract accordingly, with the bytes of the contract attached. `fetch` optionally takes a version, e.g. `"0_0_1"`, otherwise assumes of the latest version, and returns the stored bytes.
+A contract registry allows you to publish versions of a contract. Its four methods are `patch`, `minor`, `major`, and `fetch`.  The first three are for publishing and increase the version of the contract accordingly, with the bytes of the contract attached. `fetch` optionally takes a version, e.g. `"0_0_1"`, otherwise assumes of the latest version, and returns the bytes.
 
 ## Launcher
 
@@ -74,6 +74,6 @@ Stateful riffs meet the requirements for a new [`Lazy` trait](./src/lazy/mod.rs)
 This library depends on `near-sdk-rs` and re-exports it if you want to use the same version. However, if you use this version you will need to add the `wee_alloc` feature:
 
 ```toml
-contract-utils = { version = "0.0.1", features = ["wee_alloc"]}
+near-riffs = { version = "0.0.1", features = ["wee_alloc"]}
 
 ```

@@ -1,12 +1,15 @@
-use contract_utils::near_sdk::{
-    self,
-    borsh::{self, BorshDeserialize, BorshSerialize},
-    near_bindgen,
-    serde::{Deserialize, Serialize},
+use near_riffs::{
+    near_sdk::{
+        self,
+        borsh::{self, BorshDeserialize, BorshSerialize},
+        near_bindgen,
+        serde::{Deserialize, Serialize},
+    },
     witgen,
 };
 
-pub use contract_utils::prelude::*;
+pub use near_riffs::prelude::*;
+pub use near_riffs_core::*;
 
 mod views;
 
@@ -41,7 +44,7 @@ impl Contract {
     /// A change call to set the message
     #[payable]
     pub fn set_message(&mut self, message: Message) {
-        self.assert_owner();
+        Owner::assert_owner();
         self.message = message;
     }
 }

@@ -8,10 +8,10 @@ crate-type = ["cdylib"]
 
 [dependencies]
 # near-units = "0.2.0"
-contract-utils = {path = "../.."}
+near-riffs-core = {path = "../../riffs/core"}
+near-riffs = {path = "../.."}
 
-[dev-dependencies]
-witgen = "0.11.0"
 
 [features]
+default = ["near-riffs-core/wee_alloc"]
 testnet = []

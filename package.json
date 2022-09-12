@@ -1,13 +1,12 @@
 {
-  "name": "witme",
+  "name": "contract-riffs",
   "version": "0.1.0",
   "license": "LGPL-3.0",
   "private": true,
   "scripts": {
-    "pretest": "npm run build:all && npm run lint",
+    "pretest": "npm run build && npm run lint",
     "build:testnet": "npm run build -- --features testnet",
-    "build": "raen build --release ",
-    "build:all": "npm run build -- --all --exclude contract-utils",
+    "build": "raen build --release --all --exclude near-riffs --exclude './riffs/*' ",
     "test": "cargo test",
     "deploy:testnet": "npm run build:testnet && near repl -s ./scripts/deploy.ts",
     "deploy": "npm run build && near repl -s ./scripts/deploy.ts",

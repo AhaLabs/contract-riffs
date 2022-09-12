@@ -1,21 +1,27 @@
 //! # Status Message Contract
 //!
-//! This is an example contract using owneable and deployable components
+//! This is an example contract using owneable and deployable riffs
 //!
 
-use contract_utils::near_sdk::{
-    self,
-    borsh::{self, BorshDeserialize, BorshSerialize},
-    serde::{Deserialize, Serialize},
+use near_riffs::{
+    near_sdk::{
+        self,
+        borsh::{self, BorshDeserialize, BorshSerialize},
+        serde::{Deserialize, Serialize},
+        AccountId,
+    },
+    witgen,
 };
 
 /// Uses ownable to check owner before deploying contract
-pub use contract_utils::prelude::*;
+pub use near_riffs::prelude::*;
+pub use near_riffs_core::*;
 
 const MESSAGE_KEY: &str = "MESSAGE";
 
 #[derive(BorshSerialize, BorshDeserialize, Deserialize, Serialize, Default)]
 #[serde(crate = "near_sdk::serde")]
+#[witgen]
 pub struct Message {
     text: String,
 }
@@ -28,8 +34,7 @@ impl IntoKey for Message {
 
 #[no_mangle]
 pub fn update_message() {
-    // any type can assert owner (weird Rust ;-))
-    "a".assert_owner();
+    Owner::assert_owner();
 
     // Deserialize input into Message
     let msg: Message = near_sdk::serde_json::from_slice(
@@ -51,7 +56,7 @@ pub fn update_message() {
 #[no_mangle]
 pub fn get_message() {
     // Get message instance from storage and fail if doesn't exist
-    let message = Message::get_lazy().get().unwrap();
+    let message = Message::get_lazy().unwrap();
 
     // Serialize Message
     let result = near_sdk::serde_json::to_vec(&message)
@@ -59,4 +64,36 @@ pub fn get_message() {
 
     // Return serelaized result
     near_sdk::env::value_return(&result)
+}
+
+#[allow(dead_code, unused_variables)]
+mod private {
+    use super::*;
+
+    
+    #[witgen]
+    /// @change
+    fn set_owner(account_id: AccountId) {}
+
+    #[witgen]
+    fn get_owner() -> AccountId {
+        todo!("")
+    }
+
+    #[witgen]
+    fn is_owner(account_id: AccountId) -> bool {
+        todo!()
+    }
+
+    #[witgen]
+    pub fn update_message(message: Message) -> Option<Message>{
+      todo!()
+    }
+
+    #[witgen]
+    pub fn get_message() -> Option<Message>{
+      todo!()
+    }
+
+   
 }

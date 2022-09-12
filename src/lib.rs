@@ -1,19 +1,21 @@
+//! # Near Components
+//!
+//! Composible riffs for NEAR smart contracts
+
 pub use near_sdk;
 pub use near_units;
+pub use witgen::witgen;
+
 pub mod account;
-pub mod deploy;
 pub mod lazy;
-pub mod owner;
-pub mod publish;
+pub mod promise;
 pub mod reg;
 pub mod version;
 
-use near_sdk::{env, require};
+use near_sdk::{env, require, AccountId};
 
 pub mod prelude {
-    pub use super::deploy::*;
     pub use super::lazy::Lazy;
-    pub use super::owner::*;
     pub use super::IntoKey;
 }
 
@@ -45,4 +47,35 @@ pub fn refund_storage_cost<F: FnOnce()>(f: F) {
 
 pub trait IntoKey {
     fn into_storage_key() -> Vec<u8>;
+}
+
+pub fn input_as_str() -> String {
+    unsafe { String::from_utf8_unchecked(env::input().unwrap()) }
+}
+
+/// Can decode `{"account_id": account_id}`, `"account_id"`, or `account_id`
+pub fn account_id_from_input() -> AccountId {
+    let input = input_as_str();
+    input.parse().unwrap_or_else(|_| {
+        parse_json_or_string(input, "account_id")
+            .unwrap()
+            .parse()
+            .unwrap()
+    })
+}
+
+pub fn parse_json_or_string(
+    input: String,
+    key: &str,
+) -> Result<String, microjson::JSONParsingError> {
+    use microjson::JSONValue;
+    let object = JSONValue::parse(&input).unwrap();
+    use microjson::JSONValueType;
+    match object.value_type {
+        JSONValueType::String => object.read_string().map(Into::into),
+        JSONValueType::Object => object
+            .get_key_value(key)
+            .and_then(|val| val.read_string().map(|x| x.to_string())),
+        _ => env::panic_str("cannot parse account_id"),
+    }
 }

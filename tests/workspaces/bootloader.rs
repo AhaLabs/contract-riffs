@@ -1,95 +1,90 @@
-use near_units::parse_gas;
-use serde_json::{json, Value};
+#![allow(unused_must_use)]
+use near_units::parse_near;
+use serde_json::json;
 
-use crate::utils::init;
+use crate::utils::{AssertResult, IntoVec, TestEnv};
 
 #[tokio::test]
 async fn initialize_correctly() -> anyhow::Result<()> {
-    let worker = &workspaces::sandbox().await?;
-    let root = worker.root_account();
-    let (bootloader, _) = init(worker, &root, false).await?;
-
-    let res = bootloader.view(worker, "get_owner", vec![0]).await?;
-    let owner = res.json::<String>()?;
-    assert_eq!(owner, root.id().to_string());
+    let (bootloader, test_env) = TestEnv::with_bootloader().await?;
+    let res = bootloader.view("get_owner", vec![]).await?;
+    let owner = String::from_utf8(res.result)?;
+    assert_eq!(owner, test_env.root.id().to_string());
     Ok(())
 }
 
 #[tokio::test]
 async fn owner_can_transfer() -> anyhow::Result<()> {
-    let worker = &workspaces::sandbox().await?;
-    let root = worker.root_account();
-    let (bootloader, _) = init(worker, &root, false).await?;
+    let (bootloader, test_env) = TestEnv::with_bootloader().await?;
 
-    let alice = root
-        .create_subaccount(worker, "alice")
+    test_env
+        .root
+        .call(bootloader.id(), "set_owner")
+        .args(test_env.alice.to_vec())
         .transact()
         .await?
-        .unwrap();
-    let res = root
-        .call(worker, bootloader.id(), "set_owner")
-        .args(alice.id().as_bytes().to_vec())
-        .transact()
-        .await?;
-    assert!(res.is_success());
-    let res = bootloader.view(worker, "get_owner", vec![0]).await?;
-    let owner = res.json::<String>()?;
-    assert_eq!(owner, alice.id().to_string());
+        .assert_success();
+    let owner = bootloader
+        .view("get_owner_json", vec![])
+        .await?
+        .json::<String>()?;
+
+    assert_eq!(owner, test_env.alice.id().to_string());
     Ok(())
 }
 
 #[tokio::test]
 async fn non_owner_cannot_transfer() -> anyhow::Result<()> {
-    let worker = &workspaces::sandbox().await?;
-    let root = worker.root_account();
-    let (bootloader, _) = init(worker, &root, false).await?;
+    let (bootloader, test_env) = TestEnv::with_bootloader().await?;
 
-    let alice = root
-        .create_subaccount(worker, "alice")
+    test_env
+        .alice
+        .call(bootloader.id(), "set_owner")
+        .args(test_env.alice.to_vec())
         .transact()
         .await?
-        .unwrap();
-    let res = alice
-        .call(worker, bootloader.id(), "set_owner")
-        .args(alice.id().as_bytes().to_vec())
-        .transact()
-        .await;
-    println!("{:#?}", res);
-    assert!(res.is_err());
+        .assert_failure();
     Ok(())
 }
 
 #[tokio::test]
-async fn can_redeploy() -> anyhow::Result<()> {
-    let worker = &workspaces::sandbox().await?;
-    let root = worker.root_account();
-    let (bootloader, registry) = init(worker, &root, true).await?;
-    let (contract, registry) = registry.unwrap();
-    println!("{}", registry.id());
-
-    let res = registry.view(worker, "current_version", vec![]).await?;
+async fn can_create_registry() -> anyhow::Result<()> {
+    let testenv = TestEnv::init().await?;
+    let registry = testenv.registry_with_bootlader().await?;
+    let res = registry.view("current_version", vec![]).await?;
 
     assert_eq!("v0_0_1".to_string(), res.json::<String>()?);
 
-    let res = root
-        .call(worker, bootloader.id(), "deploy")
-        .args(format!("v0_0_1.{}", contract.id()).as_bytes().to_vec())
-        .gas(parse_gas!("250 Tgas") as u64)
-        .transact()
-        .await?;
-    println!("{:#?}\nDeployed", res.outcome());
-    assert!(res.is_success());
-    let hello = json!({ "text": "hello world" });
-    let res = root
-        .call(worker, bootloader.id(), "update_message")
-        .args_json(hello.clone())?
-        .transact()
-        .await?;
+    Ok(())
+}
 
-    let res = bootloader
-        .view(worker, "get_message", vec![])
-        .await?.json::<Value>()?;
+#[tokio::test]
+async fn can_launch_with_launcher() -> anyhow::Result<()> {
+    let (launcher, testenv) = TestEnv::with_lancher().await?;
+    let registry = testenv.registry_with_bootlader().await?;
+    let root_contract = testenv.deploy_root_contract().await?;
+    let account_id = &format!("charlie.{}", root_contract.id()).parse().unwrap();
+    let args = json!({
+    "account_id": account_id,
+    "registry": Some(registry.id()),
+    "root_account": Some(root_contract.id())
+    });
+    let res = launcher
+        .call("launch")
+        .args_json(args)
+        .max_gas()
+        .deposit(parse_near!("6 N"))
+        .transact()
+        .await?
+        .assert_success();
     println!("{:#?}", res);
-    assert_eq!(res, hello);
+    println!(
+        "{}",
+        testenv
+            .worker
+            .view(account_id, "get_owner_json", vec![],)
+            .await?
+            .json::<String>()?
+    );
     Ok(())
 }

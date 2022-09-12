@@ -1,0 +1,12 @@
+[package]
+edition = "2021"
+name = "status-message-bindgen"
+version = "0.1.0"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# near-units = "0.2.0"
+near-riffs = {path = "../..", features = ["publish", "admins", "wee_alloc"]}
+near-riffs-admins = {path = "../../riffs/admins"}

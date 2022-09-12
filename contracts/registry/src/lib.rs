@@ -1,4 +1,4 @@
-use contract_utils::{
+use near_riffs::{
     near_sdk::{
         self,
         borsh::{self, BorshDeserialize, BorshSerialize},
@@ -9,7 +9,7 @@ use contract_utils::{
     version::Version,
 };
 
-use contract_utils::prelude::*;
+pub use near_riffs_core::*;
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
@@ -30,21 +30,21 @@ impl Contract {
     /// Non-breaking fix
     #[payable]
     pub fn patch(&mut self) {
-        self.assert_owner();
+        // self.assert_owner();
         self.input_to_storage(self.current().publish_patch())
     }
 
     /// Non-breaking feature
     #[payable]
     pub fn minor(&mut self) {
-        self.assert_owner();
+        // self.assert_owner();
         self.input_to_storage(self.current().publish_minor())
     }
 
     /// Breaking change
     #[payable]
     pub fn major(&mut self) {
-        self.assert_owner();
+        // self.assert_owner();
         self.input_to_storage(self.current().publish_major())
     }
 

@@ -1,26 +1,30 @@
 [package]
 edition = "2021"
-name = "contract-utils"
-version = "0.1.0"
+name = "near-riffs"
 publish = false
+version = "0.1.0"
 
 [workspace]
 members = [
   "contracts/*",
-  "examples/*"
+  "examples/*",
+  "riffs/*",
 ]
 
+exclude = [
+]
 
 [profile.release]
 codegen-units = 1
-opt-level = "z"
-lto = true
 debug = false
-panic = "abort"
+lto = true
+opt-level = "z"
 overflow-checks = true
+panic = "abort"
 
 [dependencies]
-near-sdk = { git = "https://github.com/ahalabs/near-sdk-rs", tag = "v4.0.0-3", features = ["unstable"]}
+microjson = "0.1.1"
+near-sdk = {git = "https://github.com/ahalabs/near-sdk-rs", branch = "feat/component_macro", features = ["unstable"], default-features = false}
 near-units = "0.2.0"
 witgen = "0.14.0"
 
@@ -28,12 +32,17 @@ witgen = "0.14.0"
 anyhow = "1.0"
 base64 = "0.13.0"
 lazy-static-include = "3.1.2"
-proc-macro2 = { version = "1.0.36", features = ["span-locations"] }
+near-primitives = "0.14.0"
+proc-macro2 = {version = "1.0.36", features = ["span-locations"]}
 serde_json = "1.0"
-tokio = { version = "1.14", features = ["full"] }
-workspaces = "0.3.1"
-near-primitives = "0.12.0"
-
+tokio = {version = "1.14", features = ["full"]}
+workspaces = "0.5.0"
 
 [package.metadata.hackerman.stash.dev-dependencies]
 proc-macro2 = false
+
+[features]
+default = []
+admins = []
+wee_alloc = ["near-sdk/default"]
+publish = []

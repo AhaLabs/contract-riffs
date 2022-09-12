@@ -8,4 +8,5 @@ version = "0.1.0"
 crate-type = ["cdylib"]
 
 [dependencies]
-contract-utils = { path = "../.." }
+near-riffs = { path = "../..", features = ["wee_alloc"]}
+near-riffs-core = { path = "../../riffs/core"}

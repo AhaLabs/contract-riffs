@@ -16,13 +16,6 @@ pub struct Version {
     major: u16,
 }
 
-#[allow(dead_code)]
-mod private {
-    #[witgen::witgen]
-    /// Represents the version of the contract
-    type Version = String;
-}
-
 impl Serialize for Version {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

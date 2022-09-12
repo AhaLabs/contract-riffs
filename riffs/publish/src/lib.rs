@@ -1,7 +1,10 @@
-use crate::{near_sdk::env, owner::Owner, reg};
+use near_riffs::{
+    near_sdk::{env, Gas},
+    near_units::parse_gas,
+    reg,
+};
 
-use near_sdk::Gas;
-use near_units::parse_gas;
+use near_riffs_core::{Owner};
 
 const ONE_TGAS: Gas = Gas(parse_gas!("1 Tgas") as u64);
 
@@ -17,18 +20,18 @@ fn call_registry(function_name: &str) {
 
 #[no_mangle]
 pub fn publish_patch() {
-    Owner::assert();
+    Owner::assert_owner();
     call_registry("patch")
 }
 
 #[no_mangle]
 pub fn publish_minor() {
-    Owner::assert();
+    Owner::assert_owner();
     call_registry("minor")
 }
 
 #[no_mangle]
 pub fn publish_major() {
-    Owner::assert();
+    Owner::assert_owner();
     call_registry("major")
 }

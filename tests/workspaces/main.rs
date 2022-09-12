@@ -1,2 +1,2 @@
 mod bootloader;
-mod utils;
+pub(crate) mod utils;

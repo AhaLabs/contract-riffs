@@ -1,4 +1,4 @@
-use near_components::{
+use near_riffs::{
     near_sdk::{
         self,
         borsh::{self, BorshDeserialize, BorshSerialize},
@@ -8,8 +8,8 @@ use near_components::{
     witgen,
 };
 
-pub use near_components::prelude::*;
-pub use near_components_core::*;
+pub use near_riffs::prelude::*;
+pub use near_riffs_core::*;
 
 mod views;
 

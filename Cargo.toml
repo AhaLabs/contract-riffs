@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name = "near-components"
+name = "near-riffs"
 publish = false
 version = "0.1.0"
 
@@ -8,7 +8,7 @@ version = "0.1.0"
 members = [
   "contracts/*",
   "examples/*",
-  "components/*",
+  "riffs/*",
 ]
 
 exclude = [

@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name = "near-components-core"
+name = "near-riffs-core"
 version = "0.1.0"
 publish = true
 
@@ -8,8 +8,8 @@ publish = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-near-components = {path = "../.."}
+near-riffs = {path = "../.."}
 microjson = "0.1.0"
 
 [features]
-wee_alloc = ["near-components/wee_alloc"]
+wee_alloc = ["near-riffs/wee_alloc"]

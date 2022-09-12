@@ -333,8 +333,8 @@ dependencies = [
 name = "bootloader"
 version = "0.1.0"
 dependencies = [
- "near-components",
- "near-components-core",
+ "near-riffs",
+ "near-riffs-core",
 ]
 
 [[package]]
@@ -515,16 +515,16 @@ checksum = "245097e9a4535ee1e3e3931fcfcd55a796a44c643e8596ff6566d68f09b87bbc"
 name = "contract-launcher"
 version = "0.1.0"
 dependencies = [
- "near-components",
- "near-components-core",
+ "near-riffs",
+ "near-riffs-core",
 ]
 
 [[package]]
 name = "contract-registry"
 version = "0.1.0"
 dependencies = [
- "near-components",
- "near-components-core",
+ "near-riffs",
+ "near-riffs-core",
 ]
 
 [[package]]
@@ -1360,7 +1360,7 @@ dependencies = [
 name = "near"
 version = "0.1.0"
 dependencies = [
- "near-components",
+ "near-riffs",
 ]
 
 [[package]]
@@ -1443,50 +1443,6 @@ dependencies = [
  "serde_json",
  "strum",
  "thiserror",
-]
-
-[[package]]
-name = "near-components"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "base64 0.13.0",
- "lazy-static-include",
- "microjson",
- "near-primitives 0.14.0",
- "near-sdk",
- "near-units",
- "proc-macro2",
- "serde_json",
- "tokio",
- "witgen",
- "workspaces",
-]
-
-[[package]]
-name = "near-components-admins"
-version = "0.1.0"
-dependencies = [
- "microjson",
- "near-components",
- "near-components-core",
-]
-
-[[package]]
-name = "near-components-core"
-version = "0.1.0"
-dependencies = [
- "microjson",
- "near-components",
-]
-
-[[package]]
-name = "near-components-publish"
-version = "0.1.0"
-dependencies = [
- "microjson",
- "near-components",
- "near-components-core",
 ]
 
 [[package]]
@@ -1687,6 +1643,50 @@ dependencies = [
  "serde",
  "sha2 0.10.2",
  "strum",
+]
+
+[[package]]
+name = "near-riffs"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "base64 0.13.0",
+ "lazy-static-include",
+ "microjson",
+ "near-primitives 0.14.0",
+ "near-sdk",
+ "near-units",
+ "proc-macro2",
+ "serde_json",
+ "tokio",
+ "witgen",
+ "workspaces",
+]
+
+[[package]]
+name = "near-riffs-admins"
+version = "0.1.0"
+dependencies = [
+ "microjson",
+ "near-riffs",
+ "near-riffs-core",
+]
+
+[[package]]
+name = "near-riffs-core"
+version = "0.1.0"
+dependencies = [
+ "microjson",
+ "near-riffs",
+]
+
+[[package]]
+name = "near-riffs-publish"
+version = "0.1.0"
+dependencies = [
+ "microjson",
+ "near-riffs",
+ "near-riffs-core",
 ]
 
 [[package]]
@@ -2639,24 +2639,24 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 name = "status-message"
 version = "0.1.0"
 dependencies = [
- "near-components",
- "near-components-core",
+ "near-riffs",
+ "near-riffs-core",
 ]
 
 [[package]]
 name = "status-message-advanced"
 version = "0.1.0"
 dependencies = [
- "near-components",
- "near-components-core",
+ "near-riffs",
+ "near-riffs-core",
 ]
 
 [[package]]
 name = "status-message-bindgen"
 version = "0.1.0"
 dependencies = [
- "near-components",
- "near-components-admins",
+ "near-riffs",
+ "near-riffs-admins",
 ]
 
 [[package]]

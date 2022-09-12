@@ -1,4 +1,4 @@
-use near_components::{
+use near_riffs::{
     near_sdk::{
         self,
         borsh::{self, BorshDeserialize, BorshSerialize},

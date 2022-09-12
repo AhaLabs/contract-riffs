@@ -1,6 +1,6 @@
-pub use near_components::lazy::Lazy;
-pub use near_components::IntoKey;
-use near_components::{
+pub use near_riffs::lazy::Lazy;
+pub use near_riffs::IntoKey;
+use near_riffs::{
     account_id_from_input,
     near_sdk::{
         self,

@@ -1,4 +1,4 @@
-use near_components::{
+use near_riffs::{
     near_sdk::{
         self,
         borsh::{self, BorshDeserialize, BorshSerialize},
@@ -9,7 +9,7 @@ use near_components::{
     version::Version,
 };
 
-pub use near_components_core::*;
+pub use near_riffs_core::*;
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]

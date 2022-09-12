@@ -1,9 +1,9 @@
 //! # Status Message Contract
 //!
-//! This is an example contract using owneable and deployable components
+//! This is an example contract using owneable and deployable riffs
 //!
 
-use near_components::{
+use near_riffs::{
     near_sdk::{
         self,
         borsh::{self, BorshDeserialize, BorshSerialize},
@@ -14,16 +14,16 @@ use near_components::{
 };
 
 /// Uses ownable to check owner before deploying contract
-pub use near_components::prelude::*;
-pub use near_components_admins::Owner;
-// pub use near_components::{Administratable, Ownable};
+pub use near_riffs::prelude::*;
+pub use near_riffs_admins::Owner;
+// pub use near_riffs::{Administratable, Ownable};
 
 const MESSAGE_KEY: &str = "MESSAGE";
 
 #[derive(BorshSerialize, BorshDeserialize, Deserialize, Serialize, Default)]
 #[serde(crate = "near_sdk::serde")]
 #[witgen]
-#[near_bindgen(component)]
+#[near_bindgen(riff)]
 pub struct Message {
     text: String,
 }
@@ -47,7 +47,7 @@ impl IntoKey for Message {
     }
 }
 
-#[near_bindgen(component)]
+#[near_bindgen(riff)]
 impl Message {
     pub fn update_message(&mut self, message: Message) -> Message {
         Owner::assert_owner();

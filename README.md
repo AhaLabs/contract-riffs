@@ -1,6 +1,6 @@
-# Bootme: contract standards for publishing, deploying, and upgrading contracts
+# Near Riffs: contract standards for publishing, deploying, and upgrading contracts
 
-Currently NEAR smart contracts written in Rust are singletons; there is one struct or enum that represents the state of the contract. This state is stored in contract storage with the aptly named key `STATE`. Each time a contract method is called, this state is read, potentially updated, and written back to storage.
+Currently NEAR smart contracts written in Rust using `near_sdk_rs` are singletons; there is one struct or enum that represents the state of the contract. This state is stored in contract storage with the aptly named key `STATE`. Each time a contract method is called, this state is read and potentially updated in storage.
 
 ## Contract Riff
 
@@ -22,7 +22,7 @@ This is the core riff of a contract. It stores the `AccountId` with the unique k
 Any contract that includes an owner riff will then be _ownable_ and can restrict certain methods to the owner's account. For example having the following in your contract's `lib.rs` file:
 
 ```rust
-pub use contract_utils::owner::*;
+pub use near_riffs_core::owner::*;
 ```
 
 Note `pub` here.  This exports the owner's riffs methods.

@@ -1,5 +1,5 @@
 use crate::*;
-use near_components::near_sdk::near_bindgen;
+use near_riffs::near_sdk::near_bindgen;
 
 trait ViewMessage {
     fn get_message(self) -> Message;

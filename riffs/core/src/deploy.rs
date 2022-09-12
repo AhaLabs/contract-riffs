@@ -1,5 +1,5 @@
 use crate::Owner;
-use near_components::{
+use near_riffs::{
     account::assert_private,
     account_id_from_input,
     near_sdk::{env, AccountId},
@@ -85,7 +85,7 @@ fn parse_input() -> (Vec<u8>, AccountId) {
 // #[allow(dead_code, unused_variables)]
 // mod private {
 
-//   use near_components::{near_sdk::AccountId, witgen};
+//   use near_riffs::{near_sdk::AccountId, witgen};
 
 //   #[witgen]
 //   /// Redeploys contract from  provided registry.

@@ -1,17 +1,17 @@
-use near_components::prelude::*;
+use near_riffs::prelude::*;
 
-use near_components::near_sdk::{
+use near_riffs::near_sdk::{
     self,
     borsh::{self, BorshDeserialize, BorshSerialize},
     env, near_bindgen, require, AccountId,
 };
 
-pub use near_components_core::{Owner};
+pub use near_riffs_core::{Owner};
 
 const ADMINS_KEY: &str = "ADMINS";
 
 #[derive(BorshSerialize, BorshDeserialize, Default)]
-#[near_bindgen(component)]
+#[near_bindgen(riff)]
 pub struct Admins {
     admins: Vec<AccountId>,
 }

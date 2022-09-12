@@ -1,6 +1,6 @@
 //! # Near Components
 //!
-//! Composible components for NEAR smart contracts
+//! Composible riffs for NEAR smart contracts
 
 pub use near_sdk;
 pub use near_units;

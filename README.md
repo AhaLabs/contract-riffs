@@ -6,14 +6,12 @@ Currently NEAR smart contracts written in Rust using `near_sdk_rs` are singleton
 
 The concept of this singleton stored with a unique key in storage is called a _contract riff_. Thus the current `STATE` singleton used by `near_sdk_rs` is a contract riff.
 
-This project allows adding multiple riffs per contract.
-
 A riff must have the following:
 
 - Be Borsh serializable; to be written and read to storage
 - Have a unique key in storage
 
-That's it!
+That's it! Since their keys are unique a contract can have several riffs.
 
 ### Example: Owner Riff
 
@@ -29,10 +27,10 @@ Note `pub` here.  This exports the owner's riffs methods.
 
 ### Example: Deploy Riff
 
-The `Owner` riff is a _stateful_ riff, however, the `Deploy` riff is a functional riff which depends on the `Owner` riff. It provides a `deploy` method that only the owner can call. This method requires the address of a contract which has a registry, which returns the bytes of a published contract.
+The `Owner` riff is a _stateful_ riff, however, the `Deploy` riff is a functional and depends on the `Owner` riff. It provides a `deploy` method that only the owner can call. This method requires the address of a registry contract, which returns the bytes of a published contract.
 
 ```rust
-pub use contract_utils::deploy::*;
+pub use near_riffs_core::deploy::*;
 ```
 
 ## Bootloader
@@ -44,7 +42,7 @@ Once deployed the owner account can call `deploy` to redeploy the contract into 
 To include both these core riffs you simple include the prelude:
 
 ```rust
-pub use contract_utils::prelude::*;
+pub use near_riffs_core::*;
 ```
 
 ## Registry
@@ -67,7 +65,7 @@ Currently when upgrading a contract with new state the riff located at `STATE` m
 
 A common pattern in contracts is to use a lazy option in the `STATE` struct, which essentially acts like a riff and is only read in when required.
 
-Stateful riffs meet the requirements for a new [`Lazy` trait](./src/lazy/mod.rs), allowing them to loaded using a lazy option and be referenced by other riffs. This allows the only the riffs needed for the current execution to be loaded in, saving on gas.
+Stateful riffs meet the requirements for a new [`Lazy` trait](./src/lazy/mod.rs), allowing them to loaded using a lazy option and be referenced by other riffs. This saves gas by only loading in the riffs needed for the current execution. 
 
 ## Using library
 

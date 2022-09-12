@@ -22,6 +22,6 @@ jobs:
       - name: Add raen
         run: cargo install raen
       - name: build
-        run: raen build --release --all --exclude near-components --exclude './components/*'
+        run: raen build --release --all --exclude near-riffs --exclude './riffs/*'
       - name: tests
         run: cargo test

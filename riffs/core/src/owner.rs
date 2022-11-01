@@ -13,7 +13,7 @@ pub const OWNER_KEY: &str = "OWNER";
 
 #[derive(BorshSerialize, BorshDeserialize, Default)]
 #[near_bindgen(riff)]
-pub struct Owner(Option<AccountId>);
+pub struct Owner(pub Option<AccountId>);
 
 // impl Default for Owner {
 //     fn default() -> Self {

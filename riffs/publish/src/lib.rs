@@ -4,7 +4,7 @@ use near_riffs::{
     reg,
 };
 
-use near_riffs_core::{Owner};
+use near_riffs_core::Owner;
 
 const ONE_TGAS: Gas = Gas(parse_gas!("1 Tgas") as u64);
 

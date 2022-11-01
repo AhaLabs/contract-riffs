@@ -1,12 +1,7 @@
 use near_riffs::{
     near_sdk::{
-        self,
-        borsh::{self, BorshDeserialize, BorshSerialize},
-        env, ext_contract,
-        json_types::U128,
-        near_bindgen, require,
-        serde::Serialize,
-        AccountId, Gas, GasWeight, Promise, PromiseResult, PublicKey,
+        self, env, json_types::U128, near_bindgen, require, AccountId, Gas, GasWeight, Promise,
+        PromiseResult, PublicKey,
     },
     near_units::{parse_gas, parse_near as near},
     prelude::*,
@@ -74,7 +69,7 @@ impl Launcher {
 
         env::promise_batch_action_add_key_with_full_access(promise_index, &new_public_key, 0);
         env::promise_batch_action_transfer(promise_index, amount);
-        
+
         // Load the contract's bytes into a register
         let registry = Registry::get_lazy();
         let bytes_reg = if let Some(registry) = registry {

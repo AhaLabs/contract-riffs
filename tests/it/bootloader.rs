@@ -5,9 +5,7 @@ use workspaces::Account;
 
 const SIX_NEAR: u128 = near!("6 N");
 
-use crate::utils::{
-    AccountIdTools, AssertResult, Contracts, IntoVec, TestEnv, ALICE,
-};
+use crate::utils::{AccountIdTools, AssertResult, Contracts, IntoVec, TestEnv, ALICE};
 
 #[tokio::test]
 async fn initialize_correctly() -> anyhow::Result<()> {

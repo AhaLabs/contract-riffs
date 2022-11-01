@@ -70,7 +70,6 @@ pub fn get_message() {
 mod private {
     use super::*;
 
-    
     #[witgen]
     /// @change
     fn set_owner(account_id: AccountId) {}
@@ -86,14 +85,12 @@ mod private {
     }
 
     #[witgen]
-    pub fn update_message(message: Message) -> Option<Message>{
-      todo!()
+    pub fn update_message(message: Message) -> Option<Message> {
+        todo!()
     }
 
     #[witgen]
-    pub fn get_message() -> Option<Message>{
-      todo!()
+    pub fn get_message() -> Option<Message> {
+        todo!()
     }
-
-   
 }

@@ -6,7 +6,7 @@ use near_riffs::near_sdk::{
     env, near_bindgen, require, AccountId,
 };
 
-pub use near_riffs_core::{Owner};
+pub use near_riffs_core::Owner;
 
 const ADMINS_KEY: &str = "ADMINS";
 
@@ -22,13 +22,10 @@ impl IntoKey for Admins {
     }
 }
 
-
-
-
 impl Admins {
     pub fn assert_owner_or_admin() {
-      let this = Admins::get_lazy().unwrap();
-      let pred = env::predecessor_account_id();
+        let this = Admins::get_lazy().unwrap();
+        let pred = env::predecessor_account_id();
         require!(
             this.is_admin(&pred) || Owner::get_lazy().unwrap().is_owner(pred),
             "Not allowed: must be owner or admin"

@@ -5,7 +5,6 @@ use near_sdk::{
 
 use crate::IntoKey;
 
-
 const ERR_VALUE_SERIALIZATION: &str = "Cannot serialize value with Borsh";
 const ERR_VALUE_DESERIALIZATION: &str = "Cannot deserialize value with Borsh";
 
@@ -29,8 +28,6 @@ where
     fn get_lazy() -> Option<Self> {
         storage_read::<Item>().as_deref().map(deserialize)
     }
-
-    
 
     fn set_lazy(value: Self) -> Option<Self> {
         storage_write(value).as_deref().map(deserialize)

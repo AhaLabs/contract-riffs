@@ -19,7 +19,7 @@ pub mod prelude {
     pub use super::IntoKey;
 }
 
-/// Mesaure cost
+/// Mesaure cost of storage for a function
 pub fn measure_storage_cost<F: FnOnce()>(f: F) -> u128 {
     let bytes_used_before = env::storage_usage();
     f();
@@ -37,6 +37,14 @@ pub fn left_over_balance<F: FnOnce()>(f: F) -> u128 {
     attached_deposit - cost
 }
 
+/// Excute function f, then transfer funds left over after charging for storage stake.
+/// ```ignore
+/// pub fn contract_method(&mut self, item: Item) {
+/// refund_storage_cost(|| {
+///     self.push(&item)
+/// })
+/// }
+/// ```
 pub fn refund_storage_cost<F: FnOnce()>(f: F) {
     let amount_to_refund = left_over_balance(f);
     if 0 < amount_to_refund {
@@ -69,7 +77,7 @@ pub fn parse_json_or_string(
     key: &str,
 ) -> Result<String, microjson::JSONParsingError> {
     use microjson::JSONValue;
-    let object = JSONValue::parse(&input).unwrap();
+    let object = JSONValue::parse(&input)?;
     use microjson::JSONValueType;
     match object.value_type {
         JSONValueType::String => object.read_string().map(Into::into),

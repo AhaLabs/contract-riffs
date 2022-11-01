@@ -6,11 +6,12 @@
   "scripts": {
     "pretest": "npm run build && npm run lint",
     "build:testnet": "npm run build -- --features testnet",
-    "build": "raen build --release --all --exclude near-riffs --exclude './riffs/*' ",
+    "build": "raen build --release --all --exclude near-riffs --exclude 'near-riffs-core'  --exclude 'near-riffs-admins' --exclude 'near-riffs-publish' --exclude 'near-riffs-launcher' --exclude near-riffs-registry",
     "test": "cargo test",
     "deploy:testnet": "npm run build:testnet && near repl -s ./scripts/deploy.ts",
     "deploy": "npm run build && near repl -s ./scripts/deploy.ts",
     "test:ci": "npm run test",
+    "test:it": "cargo test --test it -- --nocapture",
     "lint": "cargo clippy --tests -- -Dclippy::all"
   },
   "devDependencies": {

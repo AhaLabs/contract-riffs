@@ -1,0 +1,18 @@
+[package]
+edition = "2021"
+name = "factory"
+version = "0.1.0"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# near-units = "0.2.0"
+near-riffs-core = { path = "../../riffs/core" }
+near-riffs = { path = "../.." }
+near-riffs-launcher = { path = "../../riffs/launcher" }
+
+
+[features]
+default = ["near-riffs-core/wee_alloc"]
+testnet = []

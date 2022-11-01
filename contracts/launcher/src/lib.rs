@@ -4,7 +4,7 @@ use near_riffs::{
         borsh::{self, BorshDeserialize, BorshSerialize},
         env, ext_contract, near_bindgen,
         serde::Serialize,
-        AccountId, Promise, PromiseOrValue, PublicKey,
+        AccountId, Promise, PublicKey,
     },
     witgen,
 };

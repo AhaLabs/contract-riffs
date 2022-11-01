@@ -1,21 +1,24 @@
-use near_sdk::{env, sys};
+use near_sdk::{env, require, sys};
 
-pub const EVICTED_REGISTER: u64 = std::u64::MAX - 1;
-pub const DATA_REGISTER: u64 = std::u64::MAX - 2;
-
+const EVICTED: u64 = u64::MAX - 1;
+// const DATA: u64 = u64::MAX - 2;
 pub enum Registers {
-    Input = 1,
-    CurrentAccountId = 2,
-    PredecessorAccountId = 3,
-    SignerAccountId = 4,
-    SignerAccountPk = 5,
-    StorageRead = 6,
-    StorageWriteEviction = 7,
+    Input = 0,
+    CurrentAccountId = 1,
+    PredecessorAccountId = 2,
+    SignerAccountId = 3,
+    SignerAccountPk = 4,
+    StorageRead = 5,
+    StorageWriteEviction = 6,
+    PromiseResult0 = 7,
+    PromiseResult1 = 8,
+    PromiseResult2 = 9,
+    PromiseResult3 = 10,
 }
 
 impl Registers {
     pub fn use_reg<F: FnOnce(u64)>(self, f: F) -> u64 {
-        static mut READ_REGISTERS: [bool; 8] = [false; 8];
+        static mut READ_REGISTERS: [bool; 11] = [false; 11];
         let reg_int = self.into();
         unsafe {
             if !READ_REGISTERS[reg_int as usize] {
@@ -24,6 +27,38 @@ impl Registers {
             }
             reg_int
         }
+    }
+
+    pub fn from_promise_index(index: u64) -> Self {
+        require!(index < 4, "promise index cannot be greater than 3 {}");
+        match index {
+            0 => Registers::PromiseResult0,
+            1 => Registers::PromiseResult1,
+            2 => Registers::PromiseResult2,
+            3 => Registers::PromiseResult3,
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl TryFrom<u64> for Registers {
+    type Error = &'static str;
+
+    fn try_from(value: u64) -> Result<Self, Self::Error> {
+        Ok(match value {
+            0 => Registers::Input,
+            1 => Registers::CurrentAccountId,
+            2 => Registers::PredecessorAccountId,
+            3 => Registers::SignerAccountId,
+            4 => Registers::SignerAccountPk,
+            5 => Registers::StorageRead,
+            6 => Registers::StorageWriteEviction,
+            7 => Registers::PromiseResult0,
+            8 => Registers::PromiseResult1,
+            9 => Registers::PromiseResult2,
+            10 => Registers::PromiseResult3,
+            _ => return Err("invalid range for register"),
+        })
     }
 }
 
@@ -45,40 +80,28 @@ pub fn value_return(input_reg: u64) {
     unsafe { sys::value_return(u64::MAX, input_reg) }
 }
 
-pub fn storage_write(key_register: u64, value_register: u64, eviction_register: u64) -> u64 {
-    unsafe {
-        sys::storage_write(
-            u64::MAX,
-            key_register,
-            u64::MAX,
-            value_register,
-            eviction_register,
-        )
-    }
+pub fn storage_write_from_reg(key_register: u64, value_register: u64) -> u64 {
+    unsafe { sys::storage_write(u64::MAX, key_register, u64::MAX, value_register, EVICTED) }
 }
 
-pub fn storage_write_from_reg(key_value: &[u8], value_register: u64) -> u64 {
+pub fn storage_write(key_value: &[u8], value_register: u64) -> u64 {
     unsafe {
         sys::storage_write(
             key_value.len() as _,
             key_value.as_ptr() as _,
             u64::MAX,
             value_register,
-            EVICTED_REGISTER,
+            EVICTED,
         )
     }
 }
 
-pub fn storage_write_from_input(key_value: &[u8]) -> u64 {
-    unsafe {
-        sys::storage_write(
-            key_value.len() as _,
-            key_value.as_ptr() as _,
-            u64::MAX,
-            input(),
-            EVICTED_REGISTER,
-        )
-    }
+pub fn storage_write_input(key_value: &[u8]) -> u64 {
+    storage_write(key_value, input())
+}
+
+pub fn storage_write_input_from_reg(key_register: u64) -> u64 {
+    storage_write_from_reg(key_register, input())
 }
 
 pub fn storage_read_from_reg_to_reg(key_register: u64, register_id: u64) -> Option<u64> {
@@ -124,6 +147,10 @@ pub fn input_len() -> u64 {
     env::register_len(input()).unwrap()
 }
 
+pub fn input_is_empty() -> bool {
+    input_len() == 0
+}
+
 pub fn signer_account_pk() -> u64 {
     Registers::SignerAccountPk.use_reg(|reg| unsafe { sys::signer_account_pk(reg) })
 }
@@ -138,7 +165,7 @@ pub fn predecessor_account_id() -> u64 {
 
 // Promise
 
-pub fn promise_batch_create(account_id_reg: u64) -> u64 {
+pub fn promise_batch_create_from_reg(account_id_reg: u64) -> u64 {
     unsafe { sys::promise_batch_create(u64::MAX, account_id_reg) }
 }
 
@@ -235,12 +262,15 @@ pub fn promise_then(
     }
 }
 
-/// Returns register
-pub fn promise_result(index: u64, reg_id: u64) -> u64 {
-    match unsafe { sys::promise_result(index, reg_id) } {
-        1 => reg_id,
-        _ => env::panic_str("promise failed"),
-    }
+/// Will get the promise result at index and place it in a register
+/// Currently index must be less than or equal to the 4
+pub fn promise_result(index: u64) -> u64 {
+    Registers::from_promise_index(index).use_reg(|reg_id| {
+        match unsafe { sys::promise_result(index, reg_id) } {
+            1 => (),
+            _ => env::panic_str("promise failed"),
+        }
+    })
 }
 
 // Current account promises
@@ -266,15 +296,16 @@ pub fn promise_create_for_current(function_name: &str, args: &[u8], amount: u128
     promise_create_account_from_reg(current_account_id(), function_name, args, amount, gas)
 }
 
+/// Create a promise batch for the current executing contract
 pub fn promise_batch_create_for_current() -> u64 {
-    promise_batch_create(current_account_id())
+    promise_batch_create_from_reg(current_account_id())
 }
 
-/// Returns promise_index
+/// Create a promise batch action for current account for deploying a contract found in bytes_reg
 pub fn promise_batch_action_deploy_contract_for_current(bytes_reg: u64) -> u64 {
     promise_batch_action_deploy_contract(promise_batch_create_for_current(), bytes_reg)
 }
 
 pub fn promise_batch_create_for_predecessor() -> u64 {
-    promise_batch_create(predecessor_account_id())
+    promise_batch_create_from_reg(predecessor_account_id())
 }

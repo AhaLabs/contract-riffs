@@ -28,7 +28,7 @@ impl Lazy for Deployer {
 #[near_bindgen(riff)]
 impl Deployer {
     pub fn deploy(&self) {
-        Owner::assert_owner();
+        Owner::assert_with_one_yocto();
         let (arguments, account_id) = parse_input();
         Self::deploy_account(account_id, &arguments);
     }

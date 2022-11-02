@@ -37,11 +37,14 @@ impl Lazy for Launcher {
 impl Launcher {
     /// Create new account without linkdrop and deposit passed funds (used for creating sub accounts directly).
     /// Then Deploy a contract and optionally call an init method
+    /// If a public key is not provided, it will use the key of the signer
+    /// If an owner_id is not provided, it will use the predecessor_account_id
     #[payable]
     pub fn create_subaccount_and_deploy(
         &mut self,
         new_account_id: AccountId,
-        new_public_key: PublicKey,
+        new_public_key: Option<PublicKey>,
+        owner_id: Option<AccountId>,
     ) {
         let amount = env::attached_deposit();
         require!(
@@ -60,28 +63,30 @@ impl Launcher {
         env::log_str(&format!("new_account_id, {}", new_account_id));
 
         // Whoever called this contract is the new owner of new_account_id
-        let owner_id = env::predecessor_account_id();
+        let owner_id = owner_id.unwrap_or_else(env::predecessor_account_id);
 
-        // create, deploy, and initialize the new account
+        // Create batch promise for sub account
         let promise_index = env::promise_batch_create(&new_account_id);
+        // Add create action
         env::promise_batch_action_create_account(promise_index);
-        env::log_str(&format!("Create Account"));
 
-        env::promise_batch_action_add_key_with_full_access(promise_index, &new_public_key, 0);
+        // Attach a full access key, by default is the signer's public key
+        let public_key = new_public_key.unwrap_or_else(env::signer_account_pk);
+        env::promise_batch_action_add_key_with_full_access(promise_index, &public_key, 0);
+
+        // Transfer attached deposit to subaccount
         env::promise_batch_action_transfer(promise_index, amount);
 
         // Load the contract's bytes into a register
-        let registry = Registry::get_lazy();
-        let bytes_reg = if let Some(registry) = registry {
-            env::log_str(&format!("About to get registry"));
-            registry.fetch_to_reg()
-        } else {
-            env::panic_str(&format!("Failed to fetch registry"));
-        };
+        let bytes_reg = Registry::get_lazy().as_ref().map_or_else(
+            || env::panic_str("Failed to fetch registry"),
+            Registry::fetch_to_reg,
+        );
 
-        env::log_str(&format!("fetched contract bytes"));
-
+        // Use reg module to pass the register instead of byte array
         reg::promise_batch_action_deploy_contract(promise_index, bytes_reg);
+
+        // Initialize contract with at least the bootloader to be owned by owner_id
         env::promise_batch_action_function_call_weight(
             promise_index,
             "set_owner",
@@ -90,7 +95,6 @@ impl Launcher {
             INIT_GAS,
             GasWeight(2),
         );
-        env::log_str(&format!("First Promise done"));
 
         // Then attached callback to the current contract
         let final_promise_index = env::promise_batch_then(promise_index, &current_account_id);
@@ -105,17 +109,12 @@ impl Launcher {
             INIT_GAS,
             GasWeight(1),
         );
-        env::log_str(&format!("Done"));
         env::promise_return(final_promise_index)
     }
 
     /// Callback after executing `create_account`.
+    #[private]
     pub fn on_account_created(&mut self, predecessor_account_id: AccountId, amount: U128) -> bool {
-        assert_eq!(
-            env::predecessor_account_id(),
-            env::current_account_id(),
-            "Callback can only be called from the contract"
-        );
         let creation_succeeded = is_promise_success();
         if !creation_succeeded {
             // In case of failure, send funds back.

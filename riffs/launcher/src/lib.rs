@@ -5,7 +5,7 @@ use near_riffs::{
     },
     near_units::{parse_gas, parse_near as near},
     prelude::*,
-    reg, witgen,
+    reg,
 };
 
 pub use near_riffs_core::*;
@@ -14,14 +14,9 @@ use near_riffs_registry::Registry;
 const INIT_GAS: Gas = Gas(parse_gas!("20 Tgas") as u64);
 const MIN_DEPLOY_DEPOSIT: u128 = near!("6 N");
 
+#[derive(Default)]
 #[near_bindgen]
 pub struct Launcher {}
-
-impl Default for Launcher {
-    fn default() -> Self {
-        Self {}
-    }
-}
 
 impl Lazy for Launcher {
     fn get_lazy() -> Option<Self> {
@@ -130,8 +125,5 @@ fn is_promise_success() -> bool {
         1,
         "Contract expected a result on the callback"
     );
-    match env::promise_result(0) {
-        PromiseResult::Successful(_) => true,
-        _ => false,
-    }
+    matches!(env::promise_result(0), PromiseResult::Successful(_))
 }

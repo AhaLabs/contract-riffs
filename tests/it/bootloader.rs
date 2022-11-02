@@ -107,7 +107,7 @@ async fn can_launch_with_launcher() -> anyhow::Result<()> {
     "registry": Some(registry.id()),
     "root_account": Some(root_contract.id())
     });
-    let res = launcher
+    launcher
         .call("launch")
         .args_json(args)
         .max_gas()
@@ -115,7 +115,6 @@ async fn can_launch_with_launcher() -> anyhow::Result<()> {
         .transact()
         .await?
         .assert_success();
-    println!("{:#?}", res);
     println!(
         "{}",
         testenv

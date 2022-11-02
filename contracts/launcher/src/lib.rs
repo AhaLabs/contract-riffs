@@ -112,7 +112,7 @@ impl Contract {
         near::ext(root_account)
             .with_attached_deposit(amount)
             .create_account_and_deploy(
-                account_id.clone(),
+                account_id,
                 env::signer_account_pk(),
                 bytes,
                 Some("set_owner".to_string()),

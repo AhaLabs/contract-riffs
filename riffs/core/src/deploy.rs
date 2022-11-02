@@ -25,18 +25,6 @@ impl Lazy for Deployer {
     }
 }
 
-// #[default(Deployer)]
-// pub trait Deployable {
-//     /// Deploy a contract from a passed registry
-//     fn deploy() {
-//         Deployer::deploy()
-//     }
-
-//     fn _deploy() {
-//         Deployer::_deploy()
-//     }
-// }
-
 #[near_bindgen(riff)]
 impl Deployer {
     pub fn deploy(&self) {
@@ -45,6 +33,7 @@ impl Deployer {
         Self::deploy_account(account_id, &arguments);
     }
 
+    
     pub fn _deploy(&self) {
         assert_private();
         let promise_value_reg = reg::promise_result(0);
@@ -56,7 +45,7 @@ impl Deployer {
 
 impl Deployer {
     pub fn deploy_account(account_id: AccountId, arguments: &[u8]) {
-        let id = promise::promise_create(account_id.as_str(), "fetch", &arguments, 0, FETCH_GAS);
+        let id = promise::promise_create(account_id.as_str(), "fetch", arguments, 0, FETCH_GAS);
         env::promise_return(reg::promise_then_for_current(
             id,
             "_deploy",
@@ -66,16 +55,6 @@ impl Deployer {
         ))
     }
 }
-
-// #[no_mangle]
-// pub fn deploy() {
-//     Deployer::default().deploy();
-// }
-
-// #[no_mangle]
-// pub fn _deploy() {
-//     Deployer::default()._deploy();
-// }
 
 fn parse_input() -> (Vec<u8>, AccountId) {
     // v0_0_1.tenk.near
@@ -89,16 +68,3 @@ fn parse_input() -> (Vec<u8>, AccountId) {
         .to_vec();
     (arguments, subaccount.parse().unwrap())
 }
-
-// #[allow(dead_code, unused_variables)]
-// mod private {
-
-//   use near_riffs::{near_sdk::AccountId, witgen};
-
-//   #[witgen]
-//   /// Redeploys contract from  provided registry.
-//   /// e.g. `v0_0_1.contract.testnet`
-//   /// @change
-//   pub fn deploy(account_id: AccountId) {}
-
-// }

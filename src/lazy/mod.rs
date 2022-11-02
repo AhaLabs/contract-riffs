@@ -54,7 +54,5 @@ fn storage_write<T>(t: T) -> Option<Vec<u8>>
 where
     T: BorshSerialize + IntoKey,
 {
-    env::storage_write(&T::into_storage_key(), &serialize(t))
-        .then(|| env::storage_get_evicted())
-        .and_then(|x| x)
+    env::storage_write(&T::into_storage_key(), &serialize(t)).then(env::storage_get_evicted).flatten()
 }

@@ -52,10 +52,7 @@ fn is_promise_success() -> bool {
         1,
         "Contract expected a result on the callback"
     );
-    match env::promise_result(0) {
-        PromiseResult::Successful(_) => true,
-        _ => false,
-    }
+    matches!(env::promise_result(0), PromiseResult::Successful(_))
 }
 
 #[near_bindgen]
@@ -68,7 +65,7 @@ impl LinkDrop {
             env::attached_deposit() > ACCESS_KEY_ALLOWANCE,
             "Attached deposit must be greater than ACCESS_KEY_ALLOWANCE"
         );
-        let pk = public_key.into();
+        let pk = public_key;
         let value = self.accounts.get(&pk).unwrap_or(0);
         self.accounts.insert(
             &pk,
@@ -122,7 +119,7 @@ impl LinkDrop {
             .expect("Unexpected public key");
         Promise::new(new_account_id)
             .create_account()
-            .add_full_access_key(new_public_key.into())
+            .add_full_access_key(new_public_key)
             .transfer(amount)
             .then(
                 Self::ext(env::current_account_id())
@@ -145,7 +142,7 @@ impl LinkDrop {
         let amount = env::attached_deposit();
         Promise::new(new_account_id)
             .create_account()
-            .add_full_access_key(new_public_key.into())
+            .add_full_access_key(new_public_key)
             .transfer(amount)
             .then(
                 Self::ext(env::current_account_id())
@@ -172,13 +169,13 @@ impl LinkDrop {
         );
         let mut promise = Promise::new(new_account_id)
             .create_account()
-            .add_full_access_key(new_public_key.into())
+            .add_full_access_key(new_public_key)
             .transfer(amount)
             .deploy_contract(bytes);
         if let Some(function_name) = init_method {
             promise = promise.function_call(
                 function_name,
-                args.unwrap_or_else(|| vec![]),
+                args.unwrap_or_default(),
                 0,
                 DEPLOY_INIT_GAS,
             );
@@ -227,7 +224,7 @@ impl LinkDrop {
     /// Returns the balance associated with given key.
     pub fn get_key_balance(&self, key: PublicKey) -> U128 {
         self.accounts
-            .get(&key.into())
+            .get(&key)
             .expect("Key is missing")
             .into()
     }
@@ -365,7 +362,7 @@ mod tests {
         testing_env!(VMContextBuilder::new()
             .current_account_id(linkdrop())
             .predecessor_account_id(linkdrop())
-            .signer_account_pk(pk.into())
+            .signer_account_pk(pk)
             .account_balance(deposit)
             .context
             .clone());
@@ -403,7 +400,7 @@ mod tests {
         testing_env!(VMContextBuilder::new()
             .current_account_id(linkdrop())
             .predecessor_account_id(linkdrop())
-            .signer_account_pk(pk.into())
+            .signer_account_pk(pk)
             .account_balance(deposit)
             .context
             .clone());
@@ -452,7 +449,7 @@ mod tests {
         // Attempt to recreate the same linkdrop twice
         contract.send(pk.clone());
         assert_eq!(
-            contract.accounts.get(&pk.into()).unwrap(),
+            contract.accounts.get(&pk).unwrap(),
             deposit + deposit + 1 - 2 * ACCESS_KEY_ALLOWANCE
         );
     }

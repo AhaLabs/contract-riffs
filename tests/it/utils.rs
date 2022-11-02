@@ -1,11 +1,11 @@
-use anyhow::{Context, Result};
+use anyhow::Result;
 use near_units::parse_near as N;
 use workspaces::network::Sandbox;
 use workspaces::operations::Function;
 use workspaces::result::ExecutionFinalResult;
 use workspaces::{
     types::{KeyType, PublicKey, SecretKey},
-    Account, AccountId, Contract, DevNetwork, Worker,
+    Account, AccountId, Contract, Worker,
 };
 
 lazy_static_include::lazy_static_include_bytes! {
@@ -40,6 +40,7 @@ impl From<Contracts> for Vec<u8> {
 }
 
 pub const ALICE: &str = "alice";
+#[allow(dead_code)]
 pub const BOB: &str = "bob";
 
 pub type WsResult<T> = Result<T, workspaces::error::Error>;
@@ -120,14 +121,14 @@ pub trait AccountIdTools {
 
 impl AccountIdTools for AccountId {
     fn parent(&self) -> AccountId {
-        self.split_once(".")
+        self.split_once('.')
             .and_then(second)
             .and_then(to_account_id)
             .unwrap_or_else(|| self.clone())
     }
 
     fn first_account(&self) -> AccountId {
-        self.split_once(".")
+        self.split_once('.')
             .and_then(first)
             .and_then(to_account_id)
             .unwrap_or_else(|| self.clone())
@@ -146,19 +147,6 @@ impl AccountIdTools for AccountId {
     }
 }
 
-// trait ContractInit {
-//     fn set_owner(&self, owner_id: AccountId) -> Result<ExecutionFinalResult>;
-// }
-
-// impl ContractInit for Contract {
-//     fn set_owner(&self, owner_id: AccountId) -> Result<ExecutionFinalResult> {
-//         self.call("set_owner")
-//             .args(format!("\"{}\"", owner_id).as_bytes().to_vec())
-//             .transact()
-//             .await
-//     }
-// }
-
 impl TestEnv {
     pub async fn init() -> Result<Self> {
         let worker = workspaces::sandbox().await?;
@@ -174,8 +162,8 @@ impl TestEnv {
     ) -> WsResult<Contract> {
         let parent = new_account_id.parent();
         assert_eq!(parent.as_str(), root.id().as_str());
-        let _ = root
-            .batch(&new_account_id)
+        root
+            .batch(new_account_id)
             .create_account()
             .transfer(N!("6 N"))
             .deploy(bytes)
@@ -256,10 +244,6 @@ impl TestEnv {
             .await
     }
 
-    pub async fn patch_bootlader(&self, contract_id: &AccountId) -> WsResult<ExecutionFinalResult> {
-        self.patch(contract_id, BOOTLOADER.to_vec()).await
-    }
-
     pub async fn deploy_root_contract(&self) -> Result<Contract> {
         Ok(self.root.deploy(&NEAR_WASM).await?.result)
     }
@@ -275,15 +259,6 @@ impl TestEnv {
 
     pub async fn alice(&self) -> Result<Account> {
         self.create_subaccount(ALICE).await
-    }
-
-    pub async fn bob(&self) -> Result<Account> {
-        self.create_subaccount(BOB).await
-    }
-
-    pub async fn create_account_as_seed(&self, account_id: AccountId) -> Account {
-        let sk = account_id.to_sk();
-        Account::from_secret_key(account_id, sk, &self.worker)
     }
 }
 
@@ -312,6 +287,7 @@ impl TestEnv {
 pub mod ed25519 {
     use super::{KeyType, PublicKey, SecretKey};
 
+    #[allow(dead_code)]
     pub fn public_key_from_seed(seed: &str) -> PublicKey {
         SecretKey::from_seed(KeyType::ED25519, seed).public_key()
     }

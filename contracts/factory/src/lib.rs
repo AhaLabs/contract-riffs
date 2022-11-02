@@ -28,10 +28,8 @@ pub use near_riffs_launcher::*;
 mod private {
     use near_riffs::{
         near_sdk::{AccountId, PublicKey},
-        version::Version,
         witgen,
     };
-    use near_riffs_launcher::Launcher;
 
     #[witgen]
     /// @change
@@ -54,10 +52,18 @@ mod private {
     pub fn deploy(account_id: AccountId) {}
 
     #[witgen]
-    /// Create Subaccount and deploy contract. The signer is the owner of the new contract.
-    /// Currently the most recent contract in the registry is used
+    /// Create new account without linkdrop and deposit passed funds (used for creating sub accounts directly).
+    /// Then Deploy a contract and optionally call an init method
+    /// If a public key is not provided, it will use the key of the signer
+    /// If an owner_id is not provided, it will use the predecessor_account_id
+    /// Requires at least 6N = 6000000000000000000000000
     /// @change
-    pub fn create_subaccount_and_deploy(new_account_id: AccountId, new_public_key: PublicKey) {}
+    pub fn create_subaccount_and_deploy(
+        new_account_id: AccountId,
+        new_public_key: Option<PublicKey>,
+        owner_id: Option<AccountId>,
+    ) {
+    }
 
     #[witgen]
     /// get current versions in registry

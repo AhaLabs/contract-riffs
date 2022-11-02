@@ -1668,15 +1668,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "near-riffs-publish"
-version = "0.1.0"
-dependencies = [
- "microjson",
- "near-riffs",
- "near-riffs-core",
-]
-
-[[package]]
 name = "near-riffs-registry"
 version = "0.1.0"
 dependencies = [

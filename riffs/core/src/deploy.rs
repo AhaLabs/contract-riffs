@@ -2,10 +2,10 @@ use crate::Owner;
 use near_riffs::{
     account::assert_private,
     account_id_from_input,
-    near_sdk::{self, env, near_bindgen, AccountId},
+    near_sdk::{self, env, near_bindgen, AccountId, Gas},
     near_units::parse_gas,
     prelude::Lazy,
-    promise, reg,
+    reg,
 };
 
 const FETCH_GAS: u64 = parse_gas!("70 Tgas") as u64;
@@ -45,7 +45,7 @@ impl Deployer {
 
 impl Deployer {
     pub fn deploy_account(account_id: AccountId, arguments: &[u8]) {
-        let id = promise::promise_create(account_id.as_str(), "fetch", arguments, 0, FETCH_GAS);
+        let id = env::promise_create(account_id, "fetch", arguments, 0, Gas(FETCH_GAS));
         env::promise_return(reg::promise_then_for_current(
             id,
             "_deploy",

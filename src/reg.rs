@@ -171,16 +171,16 @@ pub fn promise_batch_create_from_reg(account_id_reg: u64) -> u64 {
 
 pub fn promise_batch_action_deploy_contract(promise_index: u64, bytes_reg: u64) -> u64 {
     unsafe {
-        sys::promise_batch_action_deploy_contract(promise_index, u64::MAX, bytes_reg);
+        sys::promise_batch_action_deploy_contract(promise_index, u64::MAX, bytes_reg)
     };
-    bytes_reg
+    promise_index
 }
 
 pub fn promise_batch_action_delete_key(promise_index: u64, public_key_reg: u64) -> u64 {
     unsafe {
         sys::promise_batch_action_delete_key(promise_index, u64::MAX, public_key_reg);
     };
-    public_key_reg
+    promise_index
 }
 
 pub fn promise_batch_action_delete_key_of_signer(promise_index: u64) -> u64 {

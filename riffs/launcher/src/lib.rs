@@ -34,6 +34,7 @@ impl Launcher {
     /// Then Deploy a contract and optionally call an init method
     /// If a public key is not provided, it will use the key of the signer
     /// If an owner_id is not provided, it will use the predecessor_account_id
+    /// Requires at least 6N = 6000000000000000000000000
     #[payable]
     pub fn create_subaccount_and_deploy(
         &mut self,
@@ -55,7 +56,6 @@ impl Launcher {
         let new_account_id = format!("{trimmed_account}.{current_account_id}")
             .parse::<AccountId>()
             .expect("failed to parse account id");
-        env::log_str(&format!("new_account_id, {}", new_account_id));
 
         // Whoever called this contract is the new owner of new_account_id
         let owner_id = owner_id.unwrap_or_else(env::predecessor_account_id);
@@ -95,7 +95,6 @@ impl Launcher {
         let final_promise_index = env::promise_batch_then(promise_index, &current_account_id);
         let args =
             format!("{{\"predecessor_account_id\":\"{owner_id}\", \"amount\":\"{amount}\"}}");
-        env::log_str(&args);
         env::promise_batch_action_function_call_weight(
             final_promise_index,
             "on_account_created",

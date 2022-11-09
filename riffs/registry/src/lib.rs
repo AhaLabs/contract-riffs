@@ -1,10 +1,11 @@
 use near_riffs::prelude::*;
 use near_riffs::{
+    input::DataUrl,
     near_sdk::{
         self,
         borsh::{self, BorshDeserialize, BorshSerialize},
         collections::Vector,
-        near_bindgen,
+        env, near_bindgen,
     },
     refund_storage_cost, reg,
     version::Version,
@@ -100,6 +101,16 @@ impl Registry {
             .iter()
             .map(ToString::to_string)
             .collect()
+    }
+
+    pub fn patch_contract(&mut self, contract_bytes: DataUrl) {
+        Owner::assert_owner();
+
+        // refund_storage_cost(|| {
+        let new_version = self.current().publish_patch();
+        self.versions.push(&new_version);
+        env::storage_write(&new_version.to_key(), &contract_bytes.to_vec());
+        // });
     }
 }
 

@@ -16,9 +16,9 @@ const MIN_DEPLOY_DEPOSIT: u128 = near!("6 N");
 
 #[derive(Default)]
 #[near_bindgen]
-pub struct Launcher {}
+pub struct Factory {}
 
-impl Lazy for Launcher {
+impl Lazy for Factory {
     fn get_lazy() -> Option<Self> {
         Some(Self {})
     }
@@ -29,7 +29,7 @@ impl Lazy for Launcher {
 }
 
 #[near_bindgen(riff)]
-impl Launcher {
+impl Factory {
     /// Create new account without linkdrop and deposit passed funds (used for creating sub accounts directly).
     /// Then Deploy a contract and optionally call an init method
     /// If a public key is not provided, it will use the key of the signer

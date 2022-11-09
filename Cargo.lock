@@ -594,6 +594,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "data-url"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8d7439c3735f405729d52c3fbbe4de140eaf938a1fe47d227c27f8254d4302a5"
+
+[[package]]
 name = "derive_more"
 version = "0.99.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -712,7 +718,7 @@ version = "0.1.0"
 dependencies = [
  "near-riffs",
  "near-riffs-core",
- "near-riffs-launcher",
+ "near-riffs-factory",
 ]
 
 [[package]]
@@ -1627,6 +1633,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "base64 0.13.0",
+ "data-url",
  "lazy-static-include",
  "microjson",
  "near-crypto 0.15.0",
@@ -1658,7 +1665,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "near-riffs-launcher"
+name = "near-riffs-factory"
 version = "0.1.0"
 dependencies = [
  "microjson",

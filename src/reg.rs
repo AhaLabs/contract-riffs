@@ -301,7 +301,7 @@ pub fn promise_batch_create_for_current() -> u64 {
     promise_batch_create_from_reg(current_account_id())
 }
 
-/// Create a promise batch action for current account for deploying a contract found in bytes_reg
+/// Create a promise batch action for current account for deploying a contract found in `bytes_reg`
 pub fn promise_batch_action_deploy_contract_for_current(bytes_reg: u64) -> u64 {
     promise_batch_action_deploy_contract(promise_batch_create_for_current(), bytes_reg)
 }

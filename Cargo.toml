@@ -27,6 +27,7 @@ microjson = "0.1.1"
 near-sdk = {git = "https://github.com/ahalabs/near-sdk-rs", branch = "feat/component_macro", features = ["unstable"], default-features = false}
 near-units = "0.2.0"
 witgen = "0.14.0"
+data-url = "0.2.0"
 
 [dev-dependencies]
 anyhow = "1.0"

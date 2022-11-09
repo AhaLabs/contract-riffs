@@ -11,6 +11,7 @@ pub mod lazy;
 pub mod promise;
 pub mod reg;
 pub mod version;
+pub mod input;
 
 use near_sdk::{env, require, AccountId};
 
@@ -66,25 +67,22 @@ pub fn input_as_str() -> String {
 pub fn account_id_from_input() -> AccountId {
     let input = input_as_str();
     input.parse().unwrap_or_else(|_| {
-        parse_json_or_string(input, "account_id")
+        parse_json_or_string(input.as_str(), "account_id")
             .unwrap()
             .parse()
             .unwrap()
     })
 }
 
-pub fn parse_json_or_string(
-    input: String,
-    key: &str,
-) -> Result<String, microjson::JSONParsingError> {
+pub fn parse_json_or_string(input: &str, key: &str) -> Result<String, microjson::JSONParsingError> {
     use microjson::JSONValue;
-    let object = JSONValue::parse(&input)?;
+    let object = JSONValue::parse(input)?;
     use microjson::JSONValueType;
     match object.value_type {
         JSONValueType::String => object.read_string().map(Into::into),
         JSONValueType::Object => object
             .get_key_value(key)
-            .and_then(|val| val.read_string().map(|x| x.to_string())),
+            .and_then(|val| val.read_string().map(ToString::to_string)),
         _ => env::panic_str("cannot parse account_id"),
     }
 }

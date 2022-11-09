@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 # near-units = "0.2.0"
 near-riffs-core = { path = "../../riffs/core" }
 near-riffs = { path = "../.." }
-near-riffs-launcher = { path = "../../riffs/launcher" }
+near-riffs-factory = { path = "../../riffs/factory" }
 
 
 [features]

@@ -48,3 +48,7 @@ default = []
 admins = []
 wee_alloc = ["near-sdk/default"]
 publish = []
+
+
+[package.metadata.witgen]
+export = true

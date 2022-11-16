@@ -717,7 +717,6 @@ name = "factory"
 version = "0.1.0"
 dependencies = [
  "near-riffs",
- "near-riffs-core",
  "near-riffs-factory",
 ]
 

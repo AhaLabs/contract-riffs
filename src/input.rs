@@ -1,5 +1,15 @@
 use near_sdk::serde::{Deserialize, Serialize};
 
+#[allow(dead_code)]
+mod p {
+    use witgen::witgen;
+
+    #[witgen]
+    /// Upload a file to the contract in base64 encoded data-url
+    /// @format data-url
+    pub type DataUrl = String;
+}
+
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct DataUrl(String);

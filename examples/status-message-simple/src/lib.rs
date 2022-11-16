@@ -8,7 +8,6 @@ use near_riffs::{
         self,
         borsh::{self, BorshDeserialize, BorshSerialize},
         serde::{Deserialize, Serialize},
-        AccountId,
     },
     witgen,
 };
@@ -64,33 +63,4 @@ pub fn get_message() {
 
     // Return serelaized result
     near_sdk::env::value_return(&result)
-}
-
-#[allow(dead_code, unused_variables)]
-mod private {
-    use super::*;
-
-    #[witgen]
-    /// @change
-    fn set_owner(account_id: AccountId) {}
-
-    #[witgen]
-    fn get_owner() -> AccountId {
-        todo!("")
-    }
-
-    #[witgen]
-    fn is_owner(account_id: AccountId) -> bool {
-        todo!()
-    }
-
-    #[witgen]
-    pub fn update_message(message: Message) -> Option<Message> {
-        todo!()
-    }
-
-    #[witgen]
-    pub fn get_message() -> Option<Message> {
-        todo!()
-    }
 }

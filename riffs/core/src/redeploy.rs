@@ -13,11 +13,11 @@ const DEPLOY_GAS: u64 = parse_gas!("70 Tgas") as u64;
 
 #[derive(Default)]
 #[near_bindgen]
-pub struct Deployer;
+pub struct Redeployer;
 
-impl Lazy for Deployer {
+impl Lazy for Redeployer {
     fn get_lazy() -> Option<Self> {
-        Some(Deployer {})
+        Some(Redeployer {})
     }
 
     fn set_lazy(_: Self) -> Option<Self> {
@@ -25,16 +25,15 @@ impl Lazy for Deployer {
     }
 }
 
-#[near_bindgen(riff)]
-impl Deployer {
-    pub fn deploy(&self) {
+impl Redeployer {
+    pub fn redeploy() {
         Owner::assert_with_one_yocto();
         let (arguments, account_id) = parse_input();
-        Self::deploy_account(account_id, &arguments);
+        Self::redeploy_account(account_id, &arguments);
     }
 
     
-    pub fn _deploy(&self) {
+    pub fn on_redeploy() {
         assert_private();
         let promise_value_reg = reg::promise_result(0);
         env::promise_return(reg::promise_batch_action_deploy_contract_for_current(
@@ -43,12 +42,24 @@ impl Deployer {
     }
 }
 
-impl Deployer {
-    pub fn deploy_account(account_id: AccountId, arguments: &[u8]) {
+#[no_mangle]
+pub fn redeploy() {
+    Redeployer::redeploy()
+}
+
+#[no_mangle]
+pub fn on_redeploy() {
+    Redeployer::on_redeploy()
+
+}
+
+
+impl Redeployer {
+    pub fn redeploy_account(account_id: AccountId, arguments: &[u8]) {
         let id = env::promise_create(account_id, "fetch", arguments, 0, Gas(FETCH_GAS));
         env::promise_return(reg::promise_then_for_current(
             id,
-            "_deploy",
+            "on_redeploy",
             &[],
             0,
             DEPLOY_GAS,
@@ -67,4 +78,15 @@ fn parse_input() -> (Vec<u8>, AccountId) {
         .as_bytes()
         .to_vec();
     (arguments, subaccount.parse().unwrap())
+}
+
+#[allow(dead_code, unused_variables)]
+mod private {
+    use near_riffs::{witgen, near_sdk::AccountId};
+
+    /// Redeploys contract from  provided version and registry.
+    /// e.g. `v0_0_1.contract.testnet`
+    /// @change
+    #[witgen]
+    pub fn redeploy(account_id: AccountId) {}
 }

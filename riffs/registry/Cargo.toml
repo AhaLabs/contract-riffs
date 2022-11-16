@@ -10,3 +10,6 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 near-riffs = { path = "../.." }
 near-riffs-core = { path = "../core" }
+
+[package.metadata.witgen]
+export = true

@@ -1,9 +1,7 @@
 #![allow(unused_must_use)]
 use near_units::parse_near as near;
 use serde_json::json;
-use workspaces::Account;
-
-const SIX_NEAR: u128 = near!("6 N");
+use workspaces::Contract;
 
 use crate::utils::{AccountIdTools, AssertResult, Contracts, IntoVec, TestEnv, ALICE};
 
@@ -66,39 +64,57 @@ async fn can_create_factory() -> anyhow::Result<()> {
     let factory_id = testenv.root.id().subaccount("factory");
     let factory = testenv.factory("factory", Contracts::Bootloader).await?;
     assert_eq!(&factory_id, factory.id());
-    let res = factory.view("current_version", vec![]).await?;
-    assert_eq!("v0_0_1".to_string(), res.json::<String>()?);
+    let res = factory
+        .view("current_version", vec![])
+        .await?
+        .json::<String>()?;
+    assert_eq!("v0_0_1".to_string(), res);
     Ok(())
 }
 
 #[tokio::test]
 async fn can_create_account_from_factory() -> anyhow::Result<()> {
-    let testenv = TestEnv::init().await?;
-    let factory = testenv.factory("factory", Contracts::Bootloader).await?;
-    let alice = "alice";
-    let new_account_id = factory.id().subaccount(alice);
-    let secret_key = new_account_id.to_sk();
+    let testenv = &TestEnv::init().await?;
+    let factory = &testenv.factory("factory", Contracts::Bootloader).await?;
+    let alice = &testenv.create_subaccount_and_deploy(factory, ALICE).await?;
+    let bootloader = &testenv.bootloader().await?;
+    assert_equal_contracts(alice, bootloader).await;
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn can_upgrade_from_factory() -> anyhow::Result<()> {
+    let testenv = &TestEnv::init().await?;
+    let root = &testenv.root;
+    let factory = &testenv.factory("factory", Contracts::Bootloader).await?;
+    let alice = &testenv.create_subaccount_and_deploy(factory, ALICE).await?;
     testenv
-        .root
-        .call(factory.id(), "create_subaccount_and_deploy")
-        .args_json(json!({
-            "new_account_id": new_account_id,
-            "new_public_key": secret_key.public_key(),
-        }))
-        .deposit(SIX_NEAR)
-        .max_gas()
-        .transact()
+        .patch(factory.id(), Contracts::Factory.into())
         .await?
         .assert_success();
 
-    let alice = Account::from_secret_key(new_account_id, secret_key, &testenv.worker);
-    println!("{:?}", alice.view_account().await?);
+    testenv
+        .redeploy(root, alice, factory)
+        .await?
+        .assert_success();
+
+    assert_equal_contracts(alice, factory);
+    Ok(())
+}
+
+#[tokio::test]
+async fn can_create_factory_of_factories() -> anyhow::Result<()> {
+    let testenv = &TestEnv::init().await?;
+    let factory = &testenv.factory("factory", Contracts::Factory).await?;
+    let new_factory = &testenv.create_subaccount_and_deploy(factory, ALICE).await?;
+    assert_equal_contracts(factory, new_factory).await;
     Ok(())
 }
 
 #[tokio::test]
 async fn can_launch_with_launcher() -> anyhow::Result<()> {
-    let (launcher, testenv) = TestEnv::with_lancher().await?;
+    let (launcher, testenv) = TestEnv::with_launcher().await?;
     let registry = testenv.registry(Contracts::Bootloader).await?;
     let root_contract = testenv.deploy_root_contract().await?;
     let account_id = &format!("charlie.{}", root_contract.id()).parse().unwrap();
@@ -124,4 +140,14 @@ async fn can_launch_with_launcher() -> anyhow::Result<()> {
             .json::<String>()?
     );
     Ok(())
+}
+
+async fn assert_equal_contracts(a: &Contract, b: &Contract) {
+    assert_eq!(
+        a.view_account().await.unwrap().code_hash,
+        b.view_account().await.unwrap().code_hash,
+        "Contract {}'s bytes differ from {}",
+        a.id(),
+        b.id()
+    )
 }

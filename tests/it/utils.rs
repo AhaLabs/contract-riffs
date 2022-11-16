@@ -1,5 +1,7 @@
 use anyhow::Result;
 use near_units::parse_near as N;
+use near_units::parse_near as near;
+use serde_json::json;
 use workspaces::network::Sandbox;
 use workspaces::operations::Function;
 use workspaces::result::ExecutionFinalResult;
@@ -7,6 +9,8 @@ use workspaces::{
     types::{KeyType, PublicKey, SecretKey},
     Account, AccountId, Contract, Worker,
 };
+
+pub const SIX_NEAR: u128 = near!("6 N");
 
 lazy_static_include::lazy_static_include_bytes! {
   pub BOOTLOADER => "./target/res/bootloader.wasm",
@@ -108,6 +112,7 @@ pub trait AccountIdTools {
 
     fn first_account(&self) -> AccountId;
 
+    /// Given a new subaccount without any "."s
     fn subaccount(&self, name: &str) -> AccountId;
 
     /// SecretKey generated using account_id as seed
@@ -154,6 +159,25 @@ impl TestEnv {
         Ok(Self { worker, root })
     }
 
+    pub async fn redeploy(
+        &self,
+        owner: &Account,
+        contract: &Contract,
+        registry: &Contract,
+    ) -> WsResult<ExecutionFinalResult> {
+        let version = registry
+            .view("current_version", vec![])
+            .await?
+            .json::<String>()?;
+        owner
+            .call(contract.id(), "redeploy")
+            .args(format!("{}.{}", version, registry.id()).into_bytes())
+            .deposit(1)
+            .max_gas()
+            .transact()
+            .await
+    }
+
     pub async fn deploy_and_init_subaccount(
         &self,
         bytes: &[u8],
@@ -162,8 +186,7 @@ impl TestEnv {
     ) -> WsResult<Contract> {
         let parent = new_account_id.parent();
         assert_eq!(parent.as_str(), root.id().as_str());
-        root
-            .batch(new_account_id)
+        root.batch(new_account_id)
             .create_account()
             .transfer(N!("6 N"))
             .deploy(bytes)
@@ -183,7 +206,7 @@ impl TestEnv {
         Ok((bootloader, this))
     }
 
-    pub async fn with_lancher() -> Result<(Contract, Self)> {
+    pub async fn with_launcher() -> Result<(Contract, Self)> {
         let this = Self::init().await?;
         let launcher = this.launcher().await?;
         Ok((launcher, this))
@@ -259,6 +282,32 @@ impl TestEnv {
 
     pub async fn alice(&self) -> Result<Account> {
         self.create_subaccount(ALICE).await
+    }
+
+    pub async fn create_subaccount_and_deploy(
+        &self,
+        factory: &Contract,
+        new_account_id: &str,
+    ) -> anyhow::Result<Contract> {
+        let new_account_id = factory.id().subaccount(new_account_id);
+        let secret_key = new_account_id.to_sk();
+        self.root
+            .call(factory.id(), "create_subaccount_and_deploy")
+            .args_json(json!({
+                "new_account_id": new_account_id,
+                "new_public_key": secret_key.public_key(),
+            }))
+            .deposit(SIX_NEAR)
+            .max_gas()
+            .transact()
+            .await?
+            .assert_success();
+
+        Ok(Contract::from_secret_key(
+            new_account_id,
+            secret_key,
+            &self.worker,
+        ))
     }
 }
 

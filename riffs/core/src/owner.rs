@@ -42,12 +42,11 @@ impl Owner {
             .unwrap()
             .is_owner(env::predecessor_account_id())
     }
+
 }
 
 #[near_bindgen(riff)]
 impl Owner {
-    /// Hello
-    /// @change
     pub fn set_owner(&mut self) {
         if let Some(owner) = &self.0 {
             require!(
@@ -63,28 +62,11 @@ impl Owner {
         env::value_return(self.0.as_ref().unwrap().as_bytes())
     }
 
-    pub fn get_owner_json(&self) {
-        env::value_return(format!("\"{}\"", self.0.as_ref().unwrap()).as_bytes())
+    pub fn get_owner_json(&self) -> &AccountId {
+        self.0.as_ref().unwrap()
     }
-
+    
     pub fn is_owner(self, account_id: AccountId) -> bool {
         self.0.unwrap() == account_id
     }
 }
-
-// #[no_mangle]
-// pub fn set_owner() {
-//     let mut owner = Owner::get_lazy().unwrap_or_default();
-//     owner.set_owner();
-//     Owner::set_lazy(owner);
-// }
-
-// #[no_mangle]
-// pub fn get_owner() {
-//   Owner::get_lazy().unwrap().get_owner()
-// }
-
-// #[no_mangle]
-// pub fn get_owner_json() {
-//   Owner::get_lazy().unwrap().get_owner_json()
-// }

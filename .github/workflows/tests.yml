@@ -20,7 +20,7 @@ jobs:
       - name: Add wasm32 target
         run: rustup target add wasm32-unknown-unknown
       - name: Add raen
-        run: cargo install raen
+        run: cargo install raen --version 0.1.1
       - name: build
         run: yarn build
       - name: tests

@@ -2181,9 +2181,10 @@ quick-lru@^5.1.1:
   resolved "https://registry.yarnpkg.com/quick-lru/-/quick-lru-5.1.1.tgz#366493e6b3e42a3a6885e2e99d18f80fb7a8c932"
   integrity sha512-WuyALRjWPDGtt/wzJiadO5AXY+8hZ80hVpe6MyivgraREW751X3SbhRvG3eLKOYN+8VEvqLcf3wdnt44Z4S4SA==
 
-"raen-cli@https://gitpkg.now.sh/raendev/raen/npm?chore/npm":
+raen-cli@^0.1.1:
   version "0.1.1"
-  resolved "https://gitpkg.now.sh/raendev/raen/npm?chore/npm#fe19c3b3fdc88fc2ddd968aeb223b0883be0f4c4"
+  resolved "https://registry.yarnpkg.com/raen-cli/-/raen-cli-0.1.1.tgz#630fb7e140d5b522185cb7bd1b9be6df7cea49dc"
+  integrity sha512-vQA21PJ0p9fWSrEjsU3WZihwlgUmumoi0kTDv/dY4ZG7yETeDSmHcbj+w3ldU7Jgdy3QX9f9UR1XbjJ0QkOHww==
   dependencies:
     got "^11.8.2"
     tar "^6.1.0"

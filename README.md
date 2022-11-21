@@ -1,7 +1,7 @@
 # Near Riffs: contract standards for publishing, deploying, and upgrading contracts
 
-Currently NEAR smart contracts written in Rust using `near_sdk_rs` are singletons; there is one struct or enum that represents the state of the contract. This state is stored in contract storage with the aptly named key `STATE`. Each time a contract method is called, this state is read and potentially updated in storage.
-
+Currently NEAR smart contracts written in Rust using `near_sdk_rs` are singletons; there is one struct or enum that represents the state of the contract. This state is stored in contract storage with the aptly named key `STATE`. Each time a contract method is called, this state is read and 
+potentially updated in storage.
 ## Contract Riff
 
 The concept of this singleton stored with a unique key in storage is called a _contract riff_. Thus the current `STATE` singleton used by `near_sdk_rs` is a contract riff.

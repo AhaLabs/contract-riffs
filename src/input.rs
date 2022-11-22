@@ -1,4 +1,32 @@
-use near_sdk::serde::{Deserialize, Serialize};
+use near_sdk::{serde::{Deserialize, Serialize}, env, AccountId};
+
+pub fn input_as_str() -> String {
+    unsafe { String::from_utf8_unchecked(env::input().unwrap()) }
+}
+
+/// Can decode `{"account_id": account_id}`, `"account_id"`, or `account_id`
+pub fn account_id() -> AccountId {
+    let input = input_as_str();
+    input.parse().unwrap_or_else(|_| {
+        parse_json_or_string(input.as_str(), "account_id")
+            .unwrap()
+            .parse()
+            .unwrap()
+    })
+}
+
+pub fn parse_json_or_string(input: &str, key: &str) -> Result<String, microjson::JSONParsingError> {
+    use microjson::JSONValue;
+    let object = JSONValue::parse(input)?;
+    use microjson::JSONValueType;
+    match object.value_type {
+        JSONValueType::String => object.read_string().map(Into::into),
+        JSONValueType::Object => object
+            .get_key_value(key)
+            .and_then(|val| val.read_string().map(ToString::to_string)),
+        _ => env::panic_str("cannot parse account_id"),
+    }
+}
 
 #[allow(dead_code)]
 mod p {

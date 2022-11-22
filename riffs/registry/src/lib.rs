@@ -7,7 +7,7 @@ use near_riffs::{
         collections::Vector,
         env, near_bindgen,
     },
-    refund_storage_cost, reg,
+    reg, storage,
     version::Version,
 };
 
@@ -84,7 +84,7 @@ impl Registry {
     }
 
     fn input_to_storage(&mut self, new_version: Version) {
-        refund_storage_cost(|| {
+        storage::refund_cost(|| {
             new_version.input_to_storage();
             self.versions.push(&new_version);
         })

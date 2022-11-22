@@ -1,7 +1,7 @@
 use crate::Owner;
 use near_riffs::{
     account::assert_private,
-    account_id_from_input,
+    input,
     near_sdk::{self, env, near_bindgen, AccountId, Gas},
     near_units::parse_gas,
     prelude::Lazy,
@@ -32,7 +32,6 @@ impl Redeployer {
         Self::redeploy_account(account_id, &arguments);
     }
 
-    
     pub fn on_redeploy() {
         assert_private();
         let promise_value_reg = reg::promise_result(0);
@@ -50,9 +49,7 @@ pub fn redeploy() {
 #[no_mangle]
 pub fn on_redeploy() {
     Redeployer::on_redeploy()
-
 }
-
 
 impl Redeployer {
     pub fn redeploy_account(account_id: AccountId, arguments: &[u8]) {
@@ -70,7 +67,7 @@ impl Redeployer {
 fn parse_input() -> (Vec<u8>, AccountId) {
     // v0_0_1.tenk.near
     // Currently checking string adds 10K to contract
-    let input_account_id: String = account_id_from_input().into();
+    let input_account_id: String = input::account_id().into();
     let (version, subaccount) = input_account_id.as_str().split_once('.').unwrap();
     let arguments = version
         .strip_prefix('v')
@@ -82,7 +79,7 @@ fn parse_input() -> (Vec<u8>, AccountId) {
 
 #[allow(dead_code, unused_variables)]
 mod private {
-    use near_riffs::{witgen, near_sdk::AccountId};
+    use near_riffs::{near_sdk::AccountId, witgen};
 
     /// Redeploys contract from  provided version and registry.
     /// e.g. `v0_0_1.contract.testnet`

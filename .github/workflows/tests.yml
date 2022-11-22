@@ -22,6 +22,6 @@ jobs:
         run: rustup target add wasm32-unknown-unknown
 
       - name: install yarn
-        run: yarn && yarn build
+        run: yarn config set registry https://registry.npmjs.org && yarn && yarn build
       - name: tests
         run: cargo test

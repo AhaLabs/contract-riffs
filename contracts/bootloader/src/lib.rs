@@ -22,23 +22,3 @@
 
 pub use near_riffs_core::*;
 
-/// This mod provides the WIT types that describe the Application Contract Interface (ACI)
-#[allow(dead_code, unused_variables)]
-mod private {
-    use near_riffs::{near_sdk::AccountId, witgen};
-
-    #[witgen]
-    /// @change
-    pub fn set_owner(account_id: AccountId) {}
-
-    #[witgen]
-    pub fn get_owner() -> AccountId {
-        todo!("")
-    }
-
-  #[witgen]
-  /// Redeploys contract from  provided registry. 
-  /// e.g. `v0_0_1.contract.testnet`
-  /// @change
-  pub fn deploy(account_id: AccountId) {}
-}

@@ -1,7 +1,7 @@
 [package]
 authors = ["Willem Wyndham <willem@near.org>"]
 edition = "2021"
-name = "registry"
+name = "near-riffs-registry"
 version = "0.1.0"
 
 [lib]
@@ -9,4 +9,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 near-riffs = { path = "../.." }
-near-riffs-registry = { path = "../../riffs/registry" }
+near-riffs-core = { path = "../core" }
+
+[package.metadata.witgen]
+export = true

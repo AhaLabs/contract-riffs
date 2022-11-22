@@ -27,6 +27,7 @@ microjson = "0.1.1"
 near-sdk = {git = "https://github.com/ahalabs/near-sdk-rs", branch = "feat/component_macro", features = ["unstable"], default-features = false}
 near-units = "0.2.0"
 witgen = "0.14.0"
+data-url = "0.2.0"
 
 [dev-dependencies]
 anyhow = "1.0"
@@ -36,7 +37,8 @@ near-primitives = "0.14.0"
 proc-macro2 = {version = "1.0.36", features = ["span-locations"]}
 serde_json = "1.0"
 tokio = {version = "1.14", features = ["full"]}
-workspaces = "0.5.0"
+workspaces = "0.6.0"
+near-crypto = "0.15.0"
 
 [package.metadata.hackerman.stash.dev-dependencies]
 proc-macro2 = false
@@ -46,3 +48,7 @@ default = []
 admins = []
 wee_alloc = ["near-sdk/default"]
 publish = []
+
+
+[package.metadata.witgen]
+export = true

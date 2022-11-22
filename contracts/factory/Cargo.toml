@@ -1,0 +1,17 @@
+[package]
+edition = "2021"
+name = "factory"
+version = "0.1.0"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# near-units = "0.2.0"
+near-riffs = { path = "../.." }
+near-riffs-factory = { path = "../../riffs/factory" }
+
+
+[features]
+default = ["near-riffs/wee_alloc"]
+testnet = []

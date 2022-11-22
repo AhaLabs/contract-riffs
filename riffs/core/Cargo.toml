@@ -13,3 +13,6 @@ microjson = "0.1.0"
 
 [features]
 wee_alloc = ["near-riffs/wee_alloc"]
+
+[package.metadata.witgen]
+export = true

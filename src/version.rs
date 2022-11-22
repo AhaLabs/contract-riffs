@@ -16,6 +16,14 @@ pub struct Version {
     major: u16,
 }
 
+impl From<&Version> for Vec<u8> {
+    fn from(value: &Version) -> Vec<u8> {
+        format!("{}_{}_{}", value.major, value.minor, value.patch)
+            .as_bytes()
+            .to_vec()
+    }
+}
+
 impl Serialize for Version {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -51,12 +59,10 @@ impl Version {
 
     pub fn input_to_storage(&self) {
         let key = self.to_key();
-        reg::storage_write_from_input(&key);
+        reg::storage_write_input(&key);
     }
 
     pub fn to_key(&self) -> Vec<u8> {
-        format!("{}_{}_{}", self.major, self.minor, self.patch)
-            .as_bytes()
-            .to_vec()
+        self.into()
     }
 }

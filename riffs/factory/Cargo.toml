@@ -1,0 +1,20 @@
+[package]
+authors = ["Willem Wyndham <willem@near.org>"]
+edition = "2021"
+name = "near-riffs-factory"
+version = "0.1.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+near-riffs = {path = "../.."}
+near-riffs-core = { path = "../core"}
+near-riffs-registry = {path = "../registry"}
+microjson = "0.1.2"
+
+[features]
+testnet = []
+
+[package.metadata.witgen]
+export = true

@@ -6,11 +6,12 @@
   "scripts": {
     "pretest": "npm run build && npm run lint",
     "build:testnet": "npm run build -- --features testnet",
-    "build": "raen build --release --all --exclude near-riffs --exclude './riffs/*' ",
+    "build": "raen build --release -w --all --exclude near-riffs --exclude 'near-riffs-core'  --exclude 'near-riffs-admins' --exclude 'near-riffs-factory' --exclude near-riffs-registry",
     "test": "cargo test",
     "deploy:testnet": "npm run build:testnet && near repl -s ./scripts/deploy.ts",
     "deploy": "npm run build && near repl -s ./scripts/deploy.ts",
     "test:ci": "npm run test",
+    "test:it": "cargo test --test it -- --nocapture",
     "lint": "cargo clippy --tests -- -Dclippy::all"
   },
   "devDependencies": {
@@ -18,11 +19,11 @@
     "@typescript-eslint/parser": "^5.19.0",
     "eslint": "^8.13.0",
     "near-cli": "git+https://github.com/ahalabs/near-cli#betav1",
-    "raen-cli": "^0.0.5",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "near-api-js": "git+https://github.com/ahalabs/near-api-js#betav1"
+    "near-api-js": "git+https://github.com/ahalabs/near-api-js#betav1",
+    "raen-cli": "https://gitpkg.now.sh/raendev/raen/npm?chore/npm"
   }
 }

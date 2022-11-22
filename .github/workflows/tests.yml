@@ -4,24 +4,22 @@ jobs:
   tests:
     strategy:
       matrix:
-        platform: [ubuntu-latest, macos-latest]
+        platform: [ubuntu-latest]
         node-version: ['16']
         toolchain: [stable]
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v2
+      - uses: Swatinem/rust-cache@v1
       - name: "${{ matrix.toolchain }} with rustfmt, and wasm32"
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: ${{ matrix.toolchain }}
           target: wasm32-unknown-unknown
-      - uses: Swatinem/rust-cache@v1
       - name: Add wasm32 target
         run: rustup target add wasm32-unknown-unknown
-      - name: Add raen
-        run: cargo install raen --version 0.1.1
-      - name: build
-        run: yarn build
+      - name: install yarn
+        run: npm i && npm run build
       - name: tests
         run: cargo test

@@ -24,6 +24,6 @@
   },
   "dependencies": {
     "near-api-js": "git+https://github.com/ahalabs/near-api-js#betav1",
-    "raen-cli": "https://gitpkg.now.sh/raendev/raen/npm?chore/npm"
+    "raen-cli": "^0.1.1"
   }
 }

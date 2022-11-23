@@ -2,7 +2,7 @@ use crate::Owner;
 use near_riffs::{
     account::assert_private,
     input,
-    near_sdk::{self, env, near_bindgen, AccountId, Gas},
+    near_sdk::{self, env, near_bindgen, require, AccountId, Gas},
     near_units::parse_gas,
     prelude::Lazy,
     reg,
@@ -29,6 +29,14 @@ impl Redeployer {
     pub fn redeploy() {
         Owner::assert_with_one_yocto();
         let (arguments, account_id) = parse_input();
+        if cfg!(feature = "parent_only_redeploy") {
+            let this_contract = env::current_account_id();
+            let parent = this_contract.as_str().split_once('.').map(|t| t.1).unwrap();
+            require!(
+                account_id.as_str() == parent,
+                "Can only deploy to parent account"
+            );
+        }
         Self::redeploy_account(account_id, &arguments);
     }
 

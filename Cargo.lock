@@ -293,6 +293,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "bootloader-locked"
+version = "0.1.0"
+dependencies = [
+ "near-riffs",
+ "near-riffs-core",
+]
+
+[[package]]
 name = "borsh"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -19,12 +19,14 @@ lazy_static_include::lazy_static_include_bytes! {
   pub STATUS_MESSAGE_BINDGEN => "./target/res/status_message_bindgen.wasm",
   pub LAUNCHER => "./target/res/contract_launcher.wasm",
   pub NEAR_WASM => "./target/res/near.wasm",
-  pub FACTORY => "./target/res/factory.wasm"
+  pub FACTORY => "./target/res/factory.wasm",
+  pub BOOTLOADER_LOCKED => "./target/res/bootloader_locked.wasm",
 
 }
 
 pub enum Contracts {
     Bootloader,
+    BootloaderLocked,
     Registry,
     Factory,
     NearRoot,
@@ -35,6 +37,7 @@ impl From<Contracts> for Vec<u8> {
     fn from(value: Contracts) -> Vec<u8> {
         match value {
             Contracts::Bootloader => BOOTLOADER.to_vec(),
+            Contracts::BootloaderLocked => BOOTLOADER_LOCKED.to_vec(),
             Contracts::Registry => REGISTRY.to_vec(),
             Contracts::Factory => FACTORY.to_vec(),
             Contracts::NearRoot => NEAR_WASM.to_vec(),

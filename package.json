@@ -6,7 +6,7 @@
   "scripts": {
     "pretest": "npm run build && npm run lint",
     "build:testnet": "npm run build -- --features testnet",
-    "build": "raen build --release -w --all --exclude near-riffs --exclude 'near-riffs-core'  --exclude 'near-riffs-admins' --exclude 'near-riffs-factory' --exclude near-riffs-registry",
+    "build": "raen build --release -w --all --exclude near-riffs --exclude 'near-riffs-core' --exclude 'near-riffs-admins' --exclude 'near-riffs-factory' --exclude near-riffs-registry",
     "test": "cargo test",
     "deploy:testnet": "npm run build:testnet && near repl -s ./scripts/deploy.ts",
     "deploy": "npm run build && near repl -s ./scripts/deploy.ts",

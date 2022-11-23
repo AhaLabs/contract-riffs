@@ -1,7 +1,7 @@
 pub use near_riffs::lazy::Lazy;
 pub use near_riffs::IntoKey;
 use near_riffs::{
-    account_id_from_input,
+    input,
     near_sdk::{
         self, assert_one_yocto,
         borsh::{self, BorshDeserialize, BorshSerialize},
@@ -14,12 +14,6 @@ pub const OWNER_KEY: &str = "OWNER";
 #[derive(BorshSerialize, BorshDeserialize, Default)]
 #[near_bindgen(riff)]
 pub struct Owner(pub Option<AccountId>);
-
-// impl Default for Owner {
-//     fn default() -> Self {
-//         Self(None)
-//     }
-// }
 
 impl IntoKey for Owner {
     fn into_storage_key() -> Vec<u8> {
@@ -54,7 +48,7 @@ impl Owner {
                 "only owner can transfer ownership"
             )
         }
-        let account_id = account_id_from_input();
+        let account_id = input::account_id();
         self.0 = Some(account_id);
     }
 

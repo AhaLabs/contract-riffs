@@ -84,6 +84,30 @@ async fn can_create_account_from_factory() -> anyhow::Result<()> {
 }
 
 #[tokio::test]
+async fn can_create_account_from_factory_and_be_locked() -> anyhow::Result<()> {
+    let testenv = &TestEnv::init().await?;
+    let factory = &testenv
+        .factory("factory", Contracts::BootloaderLocked)
+        .await?;
+    let alice = &testenv.create_subaccount_and_deploy(factory, ALICE).await?;
+    let factory_two = &testenv.factory("factory_2", Contracts::Factory).await?;
+    testenv
+        .redeploy(&testenv.root, alice, factory_two)
+        .await?
+        .assert_failure();
+    testenv
+        .patch(factory.id(), Contracts::Factory.into())
+        .await?
+        .assert_success();
+    testenv
+        .redeploy(&testenv.root, alice, factory)
+        .await?
+        .assert_success();
+    assert_equal_contracts(alice, factory_two).await;
+    Ok(())
+}
+
+#[tokio::test]
 async fn can_upgrade_from_factory() -> anyhow::Result<()> {
     let testenv = &TestEnv::init().await?;
     let root = &testenv.root;

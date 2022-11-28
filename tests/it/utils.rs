@@ -21,6 +21,7 @@ lazy_static_include::lazy_static_include_bytes! {
   pub NEAR_WASM => "./target/res/near.wasm",
   pub FACTORY => "./target/res/factory.wasm",
   pub BOOTLOADER_LOCKED => "./target/res/bootloader_locked.wasm",
+  pub FACTORY_NO_KEYS => "./target/res/factory_no_keys.wasm",
 
 }
 
@@ -29,6 +30,7 @@ pub enum Contracts {
     BootloaderLocked,
     Registry,
     Factory,
+    FactoryNoKeys,
     NearRoot,
     Launcher,
 }
@@ -42,6 +44,7 @@ impl From<Contracts> for Vec<u8> {
             Contracts::Factory => FACTORY.to_vec(),
             Contracts::NearRoot => NEAR_WASM.to_vec(),
             Contracts::Launcher => LAUNCHER.to_vec(),
+            Contracts::FactoryNoKeys => FACTORY_NO_KEYS.to_vec(),
         }
     }
 }
@@ -92,17 +95,17 @@ impl AssertResult for ExecutionFinalResult {
         let name = &self.outcome().executor_id;
         assert!(
             self.is_failure(),
-            "Transaction from {name} should have failed"
+            "Transaction from {name} should have failed:\n{self:#?}",
         );
     }
 }
 
-fn first<T0, T1>(t: (T0, T1)) -> Option<T0> {
-    Some(t.0)
+fn first<T0, T1>(t: (T0, T1)) -> T0 {
+    t.0
 }
 
-fn second<T0, T1>(t: (T0, T1)) -> Option<T1> {
-    Some(t.1)
+fn second<T0, T1>(t: (T0, T1)) -> T1 {
+    t.1
 }
 
 fn to_account_id(s: &str) -> Option<AccountId> {
@@ -118,11 +121,13 @@ pub trait AccountIdTools {
     /// Given a new subaccount without any "."s
     fn subaccount(&self, name: &str) -> AccountId;
 
-    /// SecretKey generated using account_id as seed
+    /// SecretKey generated using AccountId as seed.
+    /// 
     /// Currently ED25519 only
     fn to_sk(&self) -> SecretKey;
 
-    /// # PublicKey generated using account_id as seed
+    /// # PublicKey generated using AccountId as seed.
+    /// 
     /// Currently ED25519 only
     fn to_pk(&self) -> PublicKey;
 }
@@ -130,14 +135,14 @@ pub trait AccountIdTools {
 impl AccountIdTools for AccountId {
     fn parent(&self) -> AccountId {
         self.split_once('.')
-            .and_then(second)
+            .map(second)
             .and_then(to_account_id)
             .unwrap_or_else(|| self.clone())
     }
 
     fn first_account(&self) -> AccountId {
         self.split_once('.')
-            .and_then(first)
+            .map(first)
             .and_then(to_account_id)
             .unwrap_or_else(|| self.clone())
     }
@@ -256,6 +261,24 @@ impl TestEnv {
         Ok(factory)
     }
 
+    pub async fn factory_no_keys(
+        &self,
+        new_account_id: &str,
+        contract: Contracts,
+    ) -> Result<Contract> {
+        let factory = self
+            .deploy_and_init_subaccount(
+                &FACTORY_NO_KEYS,
+                &self.root.id().subaccount(new_account_id),
+                &self.root,
+            )
+            .await?;
+        self.patch(factory.id(), contract.into())
+            .await?
+            .assert_success();
+        Ok(factory)
+    }
+
     pub async fn patch(
         &self,
         contract_id: &AccountId,
@@ -294,7 +317,8 @@ impl TestEnv {
     ) -> anyhow::Result<Contract> {
         let new_account_id = factory.id().subaccount(new_account_id);
         let secret_key = new_account_id.to_sk();
-        self.root
+        let txn = self
+            .root
             .call(factory.id(), "create_subaccount_and_deploy")
             .args_json(json!({
                 "new_account_id": new_account_id,
@@ -303,8 +327,8 @@ impl TestEnv {
             .deposit(SIX_NEAR)
             .max_gas()
             .transact()
-            .await?
-            .assert_success();
+            .await?;
+        txn.assert_success();
 
         Ok(Contract::from_secret_key(
             new_account_id,

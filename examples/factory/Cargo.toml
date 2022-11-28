@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name = "factory"
+name = "factory-no-keys"
 version = "0.1.0"
 
 [lib]
@@ -13,5 +13,5 @@ near-riffs-factory = { path = "../../riffs/factory" }
 
 
 [features]
-default = ["near-riffs/wee_alloc", "near-riffs-factory/add_full_access_key"]
+default = ["near-riffs/wee_alloc"]
 testnet = []

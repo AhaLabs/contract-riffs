@@ -729,6 +729,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "factory-no-keys"
+version = "0.1.0"
+dependencies = [
+ "near-riffs",
+ "near-riffs-factory",
+]
+
+[[package]]
 name = "failure"
 version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1461,9 +1469,9 @@ dependencies = [
 
 [[package]]
 name = "near-jsonrpc-client"
-version = "0.4.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "384356f354bdf85d0ece627c6af6f38febb5406a4ffb32c5d75429b1a1472e29"
+checksum = "d1335ffce1476da6516dcd22b26cece1a495fc725c0e8fec1879073752ac068d"
 dependencies = [
  "borsh",
  "lazy_static",
@@ -1675,7 +1683,6 @@ dependencies = [
 name = "near-riffs-factory"
 version = "0.1.0"
 dependencies = [
- "microjson",
  "near-riffs",
  "near-riffs-core",
  "near-riffs-registry",
@@ -3309,9 +3316,9 @@ dependencies = [
 
 [[package]]
 name = "workspaces"
-version = "0.6.0"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fbc74416d48b2deb83004a0fff9d856e46a026c156da4acc4feca044a0a33755"
+checksum = "1f54d9286e6dc20dd6d7676de27ace7b0d4f755164fe14c1f07bcbdd08d54052"
 dependencies = [
  "async-process",
  "async-trait",

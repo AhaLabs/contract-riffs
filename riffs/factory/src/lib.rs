@@ -65,9 +65,11 @@ impl Factory {
         // Add create action
         env::promise_batch_action_create_account(promise_index);
 
-        // Attach a full access key, by default is the signer's public key
-        let public_key = new_public_key.unwrap_or_else(env::signer_account_pk);
-        env::promise_batch_action_add_key_with_full_access(promise_index, &public_key, 0);
+        if cfg!(feature = "add_full_access_key") {
+            // Attach a full access key, by default is the signer's public key
+            let public_key = new_public_key.unwrap_or_else(env::signer_account_pk);
+            env::promise_batch_action_add_key_with_full_access(promise_index, &public_key, 0);
+        }
 
         // Transfer attached deposit to subaccount
         env::promise_batch_action_transfer(promise_index, amount);

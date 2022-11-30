@@ -21,7 +21,6 @@ lazy_static_include::lazy_static_include_bytes! {
   pub NEAR_WASM => "./target/res/near.wasm",
   pub FACTORY => "./target/res/factory.wasm",
   pub BOOTLOADER_LOCKED => "./target/res/bootloader_locked.wasm",
-  pub FACTORY_NO_KEYS => "./target/res/factory_no_keys.wasm",
 
 }
 
@@ -30,7 +29,6 @@ pub enum Contracts {
     BootloaderLocked,
     Registry,
     Factory,
-    FactoryNoKeys,
     NearRoot,
     Launcher,
 }
@@ -44,7 +42,6 @@ impl From<Contracts> for Vec<u8> {
             Contracts::Factory => FACTORY.to_vec(),
             Contracts::NearRoot => NEAR_WASM.to_vec(),
             Contracts::Launcher => LAUNCHER.to_vec(),
-            Contracts::FactoryNoKeys => FACTORY_NO_KEYS.to_vec(),
         }
     }
 }
@@ -251,24 +248,6 @@ impl TestEnv {
         let factory = self
             .deploy_and_init_subaccount(
                 &FACTORY,
-                &self.root.id().subaccount(new_account_id),
-                &self.root,
-            )
-            .await?;
-        self.patch(factory.id(), contract.into())
-            .await?
-            .assert_success();
-        Ok(factory)
-    }
-
-    pub async fn factory_no_keys(
-        &self,
-        new_account_id: &str,
-        contract: Contracts,
-    ) -> Result<Contract> {
-        let factory = self
-            .deploy_and_init_subaccount(
-                &FACTORY_NO_KEYS,
                 &self.root.id().subaccount(new_account_id),
                 &self.root,
             )

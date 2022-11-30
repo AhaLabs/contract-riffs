@@ -1,7 +1,7 @@
 use near_riffs::{
     near_sdk::{
         self, env, json_types::U128, near_bindgen, require, AccountId, Gas, GasWeight, Promise,
-        PromiseResult, PublicKey,
+        PromiseResult,
     },
     near_units::{parse_gas, parse_near as near},
     prelude::*,
@@ -14,33 +14,19 @@ use near_riffs_registry::Registry;
 const INIT_GAS: Gas = Gas(parse_gas!("20 Tgas") as u64);
 const MIN_DEPLOY_DEPOSIT: u128 = near!("6 N");
 
-#[derive(Default)]
 #[near_bindgen]
 pub struct Factory {}
 
-impl Lazy for Factory {
-    fn get_lazy() -> Option<Self> {
-        Some(Self {})
-    }
-
-    fn set_lazy(value: Self) -> Option<Self> {
-        Some(value)
-    }
-}
-
 #[near_bindgen(riff)]
 impl Factory {
-    /// Create new account without linkdrop and deposit passed funds (used for creating sub accounts directly).
-    /// Then Deploy a contract and optionally call an init method
-    /// If a public key is not provided, it will use the key of the signer
-    /// If an owner_id is not provided, it will use the predecessor_account_id
+    /// Create new account and deploy a contract, and set's the owne to the predecessor_account_id,
+    /// e.i. the account that called this contract
+    /// 
     /// Requires at least 6N = 6000000000000000000000000
+    /// @change
     #[payable]
     pub fn create_subaccount_and_deploy(
-        &mut self,
         new_account_id: AccountId,
-        new_public_key: Option<PublicKey>,
-        owner_id: Option<AccountId>,
     ) {
         let amount = env::attached_deposit();
         require!(
@@ -58,18 +44,12 @@ impl Factory {
             .expect("failed to parse account id");
 
         // Whoever called this contract is the new owner of new_account_id
-        let owner_id = owner_id.unwrap_or_else(env::predecessor_account_id);
+        let owner_id = env::predecessor_account_id();
 
         // Create batch promise for sub account
         let promise_index = env::promise_batch_create(&new_account_id);
         // Add create action
         env::promise_batch_action_create_account(promise_index);
-
-        if cfg!(feature = "add_full_access_key") {
-            // Attach a full access key, by default is the signer's public key
-            let public_key = new_public_key.unwrap_or_else(env::signer_account_pk);
-            env::promise_batch_action_add_key_with_full_access(promise_index, &public_key, 0);
-        }
 
         // Transfer attached deposit to subaccount
         env::promise_batch_action_transfer(promise_index, amount);
@@ -110,7 +90,7 @@ impl Factory {
 
     /// Callback after executing `create_account`.
     #[private]
-    pub fn on_account_created(&mut self, predecessor_account_id: AccountId, amount: U128) -> bool {
+    pub fn on_account_created(predecessor_account_id: AccountId, amount: U128) -> bool {
         let creation_succeeded = is_promise_success();
         if !creation_succeeded {
             // In case of failure, send funds back.

@@ -3,7 +3,10 @@ use near_sdk::{
     env,
 };
 
-use crate::IntoKey;
+pub trait IntoKey {
+    fn into_storage_key() -> Vec<u8>;
+}
+
 
 const ERR_VALUE_SERIALIZATION: &str = "Cannot serialize value with Borsh";
 const ERR_VALUE_DESERIALIZATION: &str = "Cannot deserialize value with Borsh";
@@ -15,7 +18,7 @@ pub trait Lazy: Sized {
     fn get_lazy() -> Option<Self>;
 
     /// Write the singleton
-    fn set_lazy(value: Self) -> Option<Self>;
+    fn set_lazy(value: Self);
 }
 
 /// Here we implement the trait for all riffs.
@@ -29,8 +32,8 @@ where
         storage_read::<Item>().as_deref().map(deserialize)
     }
 
-    fn set_lazy(value: Self) -> Option<Self> {
-        storage_write(value).as_deref().map(deserialize)
+    fn set_lazy(value: Self) {
+        storage_write(value)
     }
 }
 
@@ -50,11 +53,9 @@ where
     env::storage_read(&T::into_storage_key())
 }
 
-fn storage_write<T>(t: T) -> Option<Vec<u8>>
+fn storage_write<T>(t: T)
 where
     T: BorshSerialize + IntoKey,
 {
-    env::storage_write(&T::into_storage_key(), &serialize(t))
-        .then(env::storage_get_evicted)
-        .flatten()
+    env::storage_write(&T::into_storage_key(), &serialize(t));
 }

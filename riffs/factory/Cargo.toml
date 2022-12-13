@@ -11,10 +11,11 @@ crate-type = ["cdylib", "rlib"]
 near-riffs = {path = "../.."}
 near-riffs-core = { path = "../core"}
 near-riffs-registry = {path = "../registry"}
-microjson = "0.1.2"
 
 [features]
+default = []
 testnet = []
+add_full_access_key = []
 
 [package.metadata.witgen]
 export = true

@@ -14,15 +14,9 @@ pub mod reg;
 pub mod storage;
 pub mod version;
 
+pub use lazy::IntoKey;
 
 pub mod prelude {
     pub use super::lazy::Lazy;
     pub use super::IntoKey;
 }
-
-
-pub trait IntoKey {
-    fn into_storage_key() -> Vec<u8>;
-}
-
-

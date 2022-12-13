@@ -1,5 +1,9 @@
-use near_sdk::{serde::{Deserialize, Serialize}, env, AccountId};
-
+use microjson::{JSONValue, JSONValueType};
+use near_sdk::{
+    env,
+    serde::{Deserialize, Serialize},
+    AccountId,
+};
 pub fn input_as_str() -> String {
     unsafe { String::from_utf8_unchecked(env::input().unwrap()) }
 }
@@ -16,9 +20,7 @@ pub fn account_id() -> AccountId {
 }
 
 pub fn parse_json_or_string(input: &str, key: &str) -> Result<String, microjson::JSONParsingError> {
-    use microjson::JSONValue;
     let object = JSONValue::parse(input)?;
-    use microjson::JSONValueType;
     match object.value_type {
         JSONValueType::String => object.read_string().map(Into::into),
         JSONValueType::Object => object

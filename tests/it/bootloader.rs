@@ -73,6 +73,16 @@ async fn can_create_factory() -> anyhow::Result<()> {
 }
 
 #[tokio::test]
+async fn can_create_factory_with_no_keys() -> anyhow::Result<()> {
+    let testenv = TestEnv::init().await?;
+    let factory = &testenv.factory("factory", Contracts::Bootloader).await?;
+    let alice = &testenv.create_subaccount_and_deploy(factory, ALICE).await?;
+    let s = format!("{:#?}", alice.batch().delete_key(alice.id().to_sk().public_key()).transact().await);
+    assert!(s.contains("Failed to query access key"));
+    Ok(())
+}
+
+#[tokio::test]
 async fn can_create_account_from_factory() -> anyhow::Result<()> {
     let testenv = &TestEnv::init().await?;
     let factory = &testenv.factory("factory", Contracts::Bootloader).await?;

@@ -37,6 +37,9 @@ impl Owner {
             .is_owner(env::predecessor_account_id())
     }
 
+    pub fn as_str(&self) -> &str {
+        self.0.as_ref().unwrap().as_str()
+    }
 }
 
 #[near_bindgen(riff)]
@@ -59,7 +62,7 @@ impl Owner {
     pub fn get_owner_json(&self) -> &AccountId {
         self.0.as_ref().unwrap()
     }
-    
+
     pub fn is_owner(self, account_id: AccountId) -> bool {
         self.0.unwrap() == account_id
     }

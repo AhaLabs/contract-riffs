@@ -13,5 +13,5 @@ near-riffs-factory = { path = "../../riffs/factory" }
 
 
 [features]
-default = ["near-riffs/wee_alloc"]
+default = ["near-riffs/wee_alloc", "near-riffs-factory/add_full_access_key"]
 testnet = []

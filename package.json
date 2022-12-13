@@ -6,13 +6,14 @@
   "scripts": {
     "pretest": "npm run build && npm run lint",
     "build:testnet": "npm run build -- --features testnet",
-    "build": "raen build --release -w --all --exclude near-riffs --exclude 'near-riffs-core' --exclude 'near-riffs-admins' --exclude 'near-riffs-factory' --exclude near-riffs-registry",
+    "build": "raen build --release -w --all --exclude near-riffs --exclude 'near-riffs-core' --exclude 'near-riffs-admins' --exclude 'near-riffs-factory' --exclude near-riffs-registry --exclude 'factory' && raen build --release -w -p factory",
     "test": "cargo test",
     "deploy:testnet": "npm run build:testnet && near repl -s ./scripts/deploy.ts",
     "deploy": "npm run build && near repl -s ./scripts/deploy.ts",
     "test:ci": "npm run test",
     "test:it": "cargo test --test it -- --nocapture",
-    "lint": "cargo clippy --tests -- -Dclippy::all"
+    "lint": "cargo clippy --tests -- -Dclippy::all",
+    "prebuild": "rm -rf target/wit/*0*"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.19.0",

@@ -20,9 +20,7 @@ impl Lazy for Redeployer {
         Some(Redeployer {})
     }
 
-    fn set_lazy(_: Self) -> Option<Self> {
-        None
-    }
+    fn set_lazy(_: Self) {}
 }
 
 impl Redeployer {
